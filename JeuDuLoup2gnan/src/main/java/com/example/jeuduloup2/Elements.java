@@ -1,17 +1,17 @@
 package com.example.jeuduloup2;
 
-public abstract class Element {
+public abstract class Elements {
     protected int x;
     protected int y;
     protected boolean accessible;
 
 
-    public Element(int x, int y) {
+    public Elements(int x, int y) {
         this.x = x;
         this.y = y;
         this.accessible = true;
     }
-    public Element() {
+    public Elements() {
         this.x = 0;
         this.y = 0;
     }

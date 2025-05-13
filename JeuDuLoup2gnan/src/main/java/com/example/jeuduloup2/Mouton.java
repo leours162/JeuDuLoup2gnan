@@ -6,38 +6,42 @@ public class Mouton extends Animal {
     private int nbCactus;
     private int nbHerbe;
     private int nbMarguerite;
-    public Mouton(int x, int y) {
-        super(x, y);
+
+
+    public Mouton(int x,int y) {
+        super(2,x,y);
         this.nbCactus = 0;
         this.nbHerbe = 0;
         this.nbMarguerite = 0;
     }
 
-    public Mouton(int nbCactus, int nbHerbe, int nbMarguerite) {
-        this.nbCactus = nbCactus;
-        this.nbHerbe = nbHerbe;
-        this.nbMarguerite = nbMarguerite;
-    }
-
-    public Mouton() {
-        this.nbCactus = 0;
-        this.nbHerbe = 0;
-        this.nbMarguerite = 0;
-    }
 
     public int getNbCactus() {
         return nbCactus;
     }
 
-    public int getNbMarguerite() {
-        return nbMarguerite;
+    public void setNbCactus(int nbCactus) {
+        this.nbCactus = nbCactus;
     }
 
     public int getNbHerbe() {
         return nbHerbe;
     }
 
-    public void Manger (){
+    public void setNbHerbe(int nbHerbe) {
+        this.nbHerbe = nbHerbe;
+    }
 
+    public int getNbMarguerite() {
+        return nbMarguerite;
+    }
+
+    public void setNbMarguerite(int nbMarguerite) {
+        this.nbMarguerite = nbMarguerite;
+    }
+
+
+    public void Manger (int nutrition){
+        this.setVitesse(nutrition);
     }
 }

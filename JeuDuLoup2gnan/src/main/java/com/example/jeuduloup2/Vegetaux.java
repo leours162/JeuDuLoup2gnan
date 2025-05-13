@@ -1,8 +1,6 @@
 package com.example.jeuduloup2;
 
-import com.example.jeuduloup2.Element;
-
-public class Vegetaux extends Element {
+public class Vegetaux extends Elements {
     private int nutrition;
     private boolean libre;
 
