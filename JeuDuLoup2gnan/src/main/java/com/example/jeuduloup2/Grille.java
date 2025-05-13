@@ -26,17 +26,17 @@ public class Grille {
         this.nbLignes += 2;
         this.nbColonnes += 2;
 
-        // 1. Ajouter les rochers en bordure
+
         for (int i = 0; i < this.nbColonnes; i++) {
             elements.add(new Rocher(i, 0)); // haut
-            elements.add(new Rocher(i, nbLignes - 1)); // bas
+            elements.add(new Rocher(i, nbLignes - 1));
         }
         for (int i = 1; i < this.nbLignes - 1; i++) {
             elements.add(new Rocher(0, i)); // gauche
-            elements.add(new Rocher(nbColonnes - 1, i)); // droite
+            elements.add(new Rocher(nbColonnes - 1, i));
         }
 
-        // 2. Ajouter de l'herbe uniquement à l'intérieur de la grille (pas sur les bords)
+
         for (int y = 1; y < this.nbLignes - 2; y++) {
             for (int x = 1; x < this.nbColonnes - 2; x++) {
                 elements.add(new Herbe(x, y));
