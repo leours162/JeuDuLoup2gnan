@@ -1,20 +1,13 @@
 package com.example.jeuduloup2;
 
-public class Animal extends Element {
+import com.example.jeuduloup2.Elements;
+
+public abstract class Animal extends Elements {
     protected int vitesse;
     protected boolean vivant;
-    protected int x, y;
 
-    public Animal(int x, int y) {
-        this.x = x;
-        this.y = y;
-    }
-
-    public int getX() { return x; }
-    public int getY() { return y; }
-
-    public Animal (int vitesse){
-        super();
+    public Animal (int vitesse,int x, int y) {
+        super(x,y);
         this.vitesse = vitesse;
         this.vivant = true;
     }
@@ -37,4 +30,8 @@ public class Animal extends Element {
     }
 
 
+    public void bouger (int x, int y){
+        this.x = x;
+        this.y = y;
+    }
 }

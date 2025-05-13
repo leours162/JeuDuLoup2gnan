@@ -3,7 +3,7 @@ package com.example.jeuduloup2;
 import java.util.ArrayList;
 
 public class Grille {
-    private ArrayList<Element> elements= new ArrayList<>();
+    private ArrayList<Elements> elements= new ArrayList<>();
     private int nbLignes;
     private int nbColonnes;
 
@@ -12,7 +12,7 @@ public class Grille {
         this.nbColonnes = nbColonnes;
     }
 
-    public ArrayList<Element> getElements() {
+    public ArrayList<Elements> getElements() {
         return elements;
     }
     public int getNbLignes() {
