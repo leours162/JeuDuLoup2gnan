@@ -22,7 +22,6 @@ public class HelloApplication extends Application {
         icone.setFitWidth(140);
         icone.setFitHeight(140);
 
-
         StackPane container = new StackPane(icone);
         container.setPrefSize(150, 150);
         container.setStyle("""
@@ -38,13 +37,20 @@ public class HelloApplication extends Application {
         return container;
     }
 
+    private void afficherMessage(String contenu, VBox messageBox) {
+        Text text = new Text(contenu);
+        text.setFont(new Font("Arial", 17));
+        text.setStyle("-fx-fill: white;");
+        messageBox.getChildren().add(text);
+    }
+
     @Override
     public void start(Stage primaryStage) {
         Grille grille = new Grille(10, 10);
         grille.miseEnPlace();
 
         StackPane container = new StackPane();
-        container.setPrefSize(150,500);
+        container.setPrefSize(150, 500);
         container.setStyle("""
             -fx-background-color: rgba(255, 255, 255, 0.1);
             -fx-border-color: white;
@@ -53,9 +59,15 @@ public class HelloApplication extends Application {
             -fx-background-radius: 15px;
             -fx-cursor: hand;
         """);
+
+        VBox messageBox = new VBox(5);
+        messageBox.setAlignment(Pos.TOP_LEFT);
+        container.getChildren().add(messageBox);
+
         VBox cont = new VBox(container);
         cont.setAlignment(Pos.CENTER_RIGHT);
-        cont.setPrefSize(150,500);
+        cont.setPrefSize(170, 500);
+
         Image imgFondHerbe = new Image(getClass().getResourceAsStream("/com/example/jeuduloup2/FondHerbe.png"));
         Image imgHerbe = new Image(getClass().getResourceAsStream("/com/example/jeuduloup2/herbe.png"));
         Image imgRocher = new Image(getClass().getResourceAsStream("/com/example/jeuduloup2/rocher.png"));
@@ -99,60 +111,47 @@ public class HelloApplication extends Application {
                 final int y = i;
 
                 cell.setOnMouseClicked(event -> {
-                    boolean estRocher = grille.getElements().stream()
-                            .anyMatch(e -> e.getX() == x && e.getY() == y && e instanceof Rocher);
-
-                    boolean animalDéjàPrésent = grille.getElements().stream()
-                            .anyMatch(e -> e.getX() == x && e.getY() == y && (e instanceof Mouton || e instanceof Loup));
-                    if (animalDéjàPrésent && !"supprimer".equals(modePlacement)) return;
+                    boolean estRocher = grille.getElements().stream().anyMatch(e -> e.getX() == x && e.getY() == y && e instanceof Rocher);
+                    boolean estLoup = grille.getElements().stream().anyMatch(e -> e.getX() == x && e.getY() == y && e instanceof Loup);
+                    boolean estMouton = grille.getElements().stream().anyMatch(e -> e.getX() == x && e.getY() == y && e instanceof Mouton);
 
                     if (modePlacement == null) return;
 
-                    if (modePlacement.equals("mouton") && !moutonPlace) {
+                    if ("mouton".equals(modePlacement) && !moutonPlace) {
                         boolean estBordure = (x == 0 || y == 0 || x == nbColonnes - 1 || y == nbLignes - 1);
-                        if (estRocher){
-                            Text text = new Text("Il y a un rocher !");
-                            text.setFont(new Font("Arial", 17));
-                            text.setStyle("-fx-text-fill: white;");
-                            container.getChildren().add(text);
-                        }
-                        else if (grille.getElements().stream().anyMatch(e -> e.getX() == x && e.getY() == y && e instanceof Loup)) {
-                            Text text = new Text("Il y a déjà un loup ici !");
-                            text.setFont(new Font("Arial", 17));
-                            text.setStyle("-fx-text-fill: white;");
-                            container.getChildren().add(text);
-                        }
-
-                        else if (!estRocher && !estBordure) {
+                        if (estRocher) {
+                            afficherMessage("Il y a un rocher !", messageBox);
+                        } else if (estLoup) {
+                            afficherMessage("Il y a un loup !", messageBox);
+                        } else if (!estBordure) {
                             cell.getChildren().clear();
                             grille.getElements().removeIf(e -> e.getX() == x && e.getY() == y && !(e instanceof Rocher));
-
                             ImageView mouton = new ImageView(imgMouton);
                             mouton.setFitWidth(TAILLE_CASE);
                             mouton.setFitHeight(TAILLE_CASE);
                             cell.getChildren().add(mouton);
-
                             grille.getElements().add(new Mouton(x, y));
                             moutonPlace = true;
                             modePlacement = null;
                         }
-
-                    } else if (modePlacement.equals("loup") && !loupPlace) {
+                    } else if ("loup".equals(modePlacement) && !loupPlace) {
                         boolean estBordure = (x == 0 || y == 0 || x == nbColonnes - 1 || y == nbLignes - 1);
-                        if (!estRocher && !estBordure) {
+                        if (estRocher) {
+                            afficherMessage("Il y a un rocher !", messageBox);
+                        } else if (estMouton) {
+                            afficherMessage("Il y a un mouton !", messageBox);
+                        } else if (!estBordure) {
                             cell.getChildren().clear();
                             grille.getElements().removeIf(e -> e.getX() == x && e.getY() == y && !(e instanceof Rocher));
-
                             ImageView loup = new ImageView(imgLoup);
                             loup.setFitWidth(TAILLE_CASE);
                             loup.setFitHeight(TAILLE_CASE);
                             cell.getChildren().add(loup);
-
                             grille.getElements().add(new Loup(x, y));
                             loupPlace = true;
                             modePlacement = null;
                         }
-                    } else if (modePlacement.equals("marguerite")) {
+                    } else if ("marguerite".equals(modePlacement)) {
                         boolean estBordure = (x == 0 || y == 0 || x == nbColonnes - 1 || y == nbLignes - 1);
                         if (!estRocher && !estBordure) {
                             cell.getChildren().clear();
@@ -163,7 +162,7 @@ public class HelloApplication extends Application {
                             cell.getChildren().add(marguerite);
                             grille.getElements().add(new Marguerite(x, y));
                         }
-                    } else if (modePlacement.equals("cactus")) {
+                    } else if ("cactus".equals(modePlacement)) {
                         boolean estBordure = (x == 0 || y == 0 || x == nbColonnes - 1 || y == nbLignes - 1);
                         if (!estRocher && !estBordure) {
                             cell.getChildren().clear();
@@ -174,7 +173,7 @@ public class HelloApplication extends Application {
                             cell.getChildren().add(cactus);
                             grille.getElements().add(new Cactus(x, y));
                         }
-                    } else if (modePlacement.equals("supprimer")) {
+                    } else if ("supprimer".equals(modePlacement)) {
                         if (!estRocher) {
                             grille.getElements().removeIf(e -> e.getX() == x && e.getY() == y && (e instanceof Mouton || e instanceof Loup));
 
@@ -191,7 +190,7 @@ public class HelloApplication extends Application {
                                 loupPlace = false;
                             }
                         }
-                    } else if (modePlacement.equals("sortie")) {
+                    } else if ("sortie".equals(modePlacement)) {
                         boolean estBordure = (x == 0 || y == 0 || x == nbColonnes - 1 || y == nbLignes - 1);
                         if (existSortie) {
                             boolean sortieEncoreValide = grille.sortieValide();
@@ -218,9 +217,6 @@ public class HelloApplication extends Application {
             }
         }
 
-
-
-
         StackPane boutonMouton = creerBoutonImage(imgMouton, () -> modePlacement = "mouton");
         StackPane boutonLoup = creerBoutonImage(imgLoup, () -> modePlacement = "loup");
         StackPane boutonMarguerite = creerBoutonImage(imgMarguerite, () -> modePlacement = "marguerite");
@@ -236,7 +232,7 @@ public class HelloApplication extends Application {
         menu1.setSpacing(50);
         HBox toutmenu = new HBox(20, menu, menu1);
         toutmenu.setAlignment(Pos.CENTER);
-        HBox rootContent = new HBox(50,cont, grid, toutmenu);
+        HBox rootContent = new HBox(50, cont, grid, toutmenu);
         rootContent.setSpacing(200);
         rootContent.setAlignment(Pos.CENTER);
 
