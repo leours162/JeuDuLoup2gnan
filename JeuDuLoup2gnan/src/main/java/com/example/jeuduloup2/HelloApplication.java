@@ -27,6 +27,8 @@ public class HelloApplication extends Application {
         Image imgRocher = new Image(getClass().getResourceAsStream("/com/example/jeuduloup2/rocher.png"));
         Image imgMouton = new Image(getClass().getResourceAsStream("/com/example/jeuduloup2/mouton.png"));
         Image imgLoup = new Image(getClass().getResourceAsStream("/com/example/jeuduloup2/loup.png"));
+        Image imgMarguerite = new Image(getClass().getResourceAsStream("/com/example/jeuduloup2/marguerite.png"));
+        Image imgCactus = new Image(getClass().getResourceAsStream("/com/example/jeuduloup2/cactus.png"));
 
         GridPane grid = new GridPane();
         grid.setMaxSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
@@ -84,7 +86,6 @@ public class HelloApplication extends Application {
                             grille.getElements().add(new Mouton(x, y));
                             moutonPlace = true;
                             modePlacement = null;
-
                         }
                     } else if (modePlacement.equals("loup") && !loupPlace) {
                         boolean estBordure = (x == 0 || y == 0 || x == nbColonnes - 1 || y == nbLignes - 1);
@@ -100,6 +101,29 @@ public class HelloApplication extends Application {
                             grille.getElements().add(new Loup(x, y));
                             loupPlace = true;
                             modePlacement = null;
+                        }
+                    } else if (modePlacement.equals("marguerite")) {
+                        boolean estBordure = (x == 0 || y == 0 || x == nbColonnes - 1 || y == nbLignes - 1);
+                        if (!estRocher && !estBordure) {
+                            cell.getChildren().clear();
+                            grille.getElements().removeIf(e -> e.getX() == x && e.getY() == y && !(e instanceof Rocher));
+                            ImageView marguerite = new ImageView(imgMarguerite);
+                            marguerite.setFitWidth(TAILLE_CASE);
+                            marguerite.setFitHeight(TAILLE_CASE);
+                            cell.getChildren().add(marguerite);
+                            grille.getElements().add(new Marguerite(x, y));
+                        }
+
+                    } else if (modePlacement.equals("cactus")) {
+                        boolean estBordure = (x == 0 || y == 0 || x == nbColonnes - 1 || y == nbLignes - 1);
+                        if (!estRocher && !estBordure) {
+                            cell.getChildren().clear();
+                            grille.getElements().removeIf(e -> e.getX() == x && e.getY() == y && !(e instanceof Rocher));
+                            ImageView cactus = new ImageView(imgCactus);
+                            cactus.setFitWidth(TAILLE_CASE);
+                            cactus.setFitHeight(TAILLE_CASE);
+                            cell.getChildren().add(cactus);
+                            grille.getElements().add(new Cactus(x, y));
                         }
 
                     } else if (modePlacement.equals("supprimer")) {
@@ -158,13 +182,19 @@ public class HelloApplication extends Application {
         Button boutonLoup = new Button("Placer le loup");
         boutonLoup.setOnAction(e -> modePlacement = "loup");
 
+        Button boutonMarguerite = new Button("Placer une marguerite");
+        boutonMarguerite.setOnAction(e -> modePlacement = "marguerite");
+
+        Button boutonCactus = new Button("Placer un cactus");
+        boutonCactus.setOnAction(e -> modePlacement = "cactus");
+
         Button boutonSupprimer = new Button("Supprimer");
         boutonSupprimer.setOnAction(e -> modePlacement = "supprimer");
 
         Button boutonSortie = new Button("Placer la sortie");
         boutonSortie.setOnAction(e -> modePlacement = "sortie");
 
-        VBox menu = new VBox(20, boutonMouton, boutonLoup, boutonSupprimer, boutonSortie);
+        VBox menu = new VBox(20, boutonMouton, boutonLoup, boutonCactus, boutonMarguerite, boutonSupprimer, boutonSortie);
         menu.setAlignment(Pos.CENTER);
 
         HBox rootContent = new HBox(50, grid, menu);

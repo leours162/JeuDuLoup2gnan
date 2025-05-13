@@ -1,8 +1,8 @@
 package com.example.jeuduloup2;
 
 public class Vegetaux extends Elements {
-    private int nutrition;
-    private boolean libre;
+    protected int nutrition;
+    protected boolean libre;
 
     public Vegetaux(int nutrition,int x,int y) {
         super(x,y);
