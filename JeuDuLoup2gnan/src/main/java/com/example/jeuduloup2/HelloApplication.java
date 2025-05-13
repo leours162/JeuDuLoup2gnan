@@ -38,12 +38,16 @@ public class HelloApplication extends Application {
                 StackPane cell = new StackPane();
                 cell.setPrefSize(TAILLE_CASE, TAILLE_CASE);
 
-                ImageView fond = new ImageView(imgHerbe);
-                fond.setFitWidth(TAILLE_CASE);
-                fond.setFitHeight(TAILLE_CASE);
-                cell.getChildren().add(fond);
+                for (Elements e : grille.getElements()) {
+                    if (e.getX() == j && e.getY() == i && e instanceof Herbe) {
+                        ImageView herbe = new ImageView(imgHerbe);
+                        herbe.setFitWidth(TAILLE_CASE);
+                        herbe.setFitHeight(TAILLE_CASE);
+                        cell.getChildren().add(herbe);
+                    }
+                }
 
-                for (Element e : grille.getElements()) {
+                for (Elements e : grille.getElements()) {
                     if (e.getX() == j && e.getY() == i && e instanceof Rocher) {
                         ImageView rocher = new ImageView(imgRocher);
                         rocher.setFitWidth(TAILLE_CASE);
