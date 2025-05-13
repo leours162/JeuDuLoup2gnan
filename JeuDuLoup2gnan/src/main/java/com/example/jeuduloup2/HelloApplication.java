@@ -71,7 +71,8 @@ public class HelloApplication extends Application {
                     if (modePlacement == null) return;
 
                     if (modePlacement.equals("mouton") && !moutonPlace) {
-                        if (!estRocher){
+                        boolean estBordure = (x == 0 || y == 0 || x == nbColonnes - 1 || y == nbLignes - 1);
+                        if (!estRocher && !estBordure) {
                             cell.getChildren().clear();
                             grille.getElements().removeIf(e -> e.getX() == x && e.getY() == y && !(e instanceof Rocher));
 
@@ -86,7 +87,8 @@ public class HelloApplication extends Application {
 
                         }
                     } else if (modePlacement.equals("loup") && !loupPlace) {
-                        if (!estRocher) {
+                        boolean estBordure = (x == 0 || y == 0 || x == nbColonnes - 1 || y == nbLignes - 1);
+                        if (!estRocher && !estBordure) {
                             cell.getChildren().clear();
                             grille.getElements().removeIf(e -> e.getX() == x && e.getY() == y && !(e instanceof Rocher));
 
@@ -122,33 +124,27 @@ public class HelloApplication extends Application {
 
                     } else if (modePlacement.equals("sortie")) {
                         boolean estBordure = (x == 0 || y == 0 || x == nbColonnes - 1 || y == nbLignes - 1);
-
-                        if (estRocher && estBordure) {
-                            if (existSortie) {
-                                grille.getElements().removeIf(e -> e.getX() == x && e.getY() == y && e instanceof Rocher);
-                                cell.getChildren().clear();
-
-                                ImageView herbe = new ImageView(imgHerbe);
-                                herbe.setFitWidth(TAILLE_CASE);
-                                herbe.setFitHeight(TAILLE_CASE);
-                                cell.getChildren().add(herbe);
-
-                                grille.getElements().add(new Herbe(x, y));
+                        if (existSortie) {
+                            boolean sortieEncoreValide = grille.sortieValide();
+                            if (sortieEncoreValide) {
                                 modePlacement = null;
+                                return;
                             }
+                        }
+                        if (estRocher && estBordure) {
                             grille.getElements().removeIf(e -> e.getX() == x && e.getY() == y && e instanceof Rocher);
                             cell.getChildren().clear();
-
                             ImageView herbe = new ImageView(imgHerbe);
                             herbe.setFitWidth(TAILLE_CASE);
                             herbe.setFitHeight(TAILLE_CASE);
                             cell.getChildren().add(herbe);
-
                             grille.getElements().add(new Herbe(x, y));
                             modePlacement = null;
                             existSortie = true;
                         }
                     }
+
+
                 });
 
                 grid.add(cell, j, i);
