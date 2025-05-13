@@ -3,6 +3,7 @@ package com.example.jeuduloup2;
 import java.util.ArrayList;
 
 public class Grille {
+    // Changer en matrice /!\ helloapplication va devoir changer
     private ArrayList<Elements> elements= new ArrayList<>();
     private int nbLignes;
     private int nbColonnes;
@@ -12,12 +13,15 @@ public class Grille {
         this.nbColonnes = nbColonnes;
     }
 
-    public ArrayList<Elements> getElements() {
+    public ArrayList<Elements> getElements()
+    {
+        //nul, a changer (plutot get element x y comme matrice )
         return elements;
     }
     public int getNbLignes() {
         return nbLignes;
     }
+
     public int getNbColonnes() {
         return nbColonnes;
     }
