@@ -43,7 +43,7 @@ public class HelloApplication extends Application {
                 fond.setFitHeight(TAILLE_CASE);
                 cell.getChildren().add(fond);
 
-                for (Element e : grille.getElements()) {
+                for (Elements e : grille.getElements()) {
                     if (e.getX() == j && e.getY() == i && e instanceof Rocher) {
                         ImageView rocher = new ImageView(imgRocher);
                         rocher.setFitWidth(TAILLE_CASE);
