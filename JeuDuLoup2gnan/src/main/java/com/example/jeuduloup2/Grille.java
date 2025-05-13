@@ -41,8 +41,8 @@ public class Grille {
         }
 
 
-        for (int y = 1; y < this.nbLignes - 2; y++) {
-            for (int x = 1; x < this.nbColonnes - 2; x++) {
+        for (int y = 1; y <= this.nbLignes - 2; y++) {
+            for (int x = 1; x <= this.nbColonnes - 2; x++) {
                 elements.add(new Herbe(x, y));
             }
         }
