@@ -40,7 +40,7 @@ public class HelloApplication extends Application {
     private void afficherMessage(String contenu, VBox messageBox) {
         Text text = new Text(contenu);
         text.setFont(new Font("Arial", 17));
-        text.setStyle("-fx-fill: white;");
+        text.setStyle("-fx-fill: red;");
         messageBox.getChildren().add(text);
     }
 
@@ -76,11 +76,13 @@ public class HelloApplication extends Application {
         Image imgSupprimer = new Image(getClass().getResourceAsStream("/com/example/jeuduloup2/supprimer.png"));
         Image imgSortie = new Image(getClass().getResourceAsStream("/com/example/jeuduloup2/sortie.png"));
         Image imgRetour = new Image(getClass().getResourceAsStream("/com/example/jeuduloup2/retour.png"));
+        Image logo = new Image(getClass().getResourceAsStream("/com/example/jeuduloup2/logo.png"));
 
         GridPane grid = new GridPane();
         Text titre = new Text("Créez le labyrinthe");
-        titre.setFont(new Font("Arial", 60));
         titre.setStyle("-fx-fill: white;");
+        Font lobster = Font.loadFont("file:/home/etu/Téléchargements/unkempt/Unkempt-Bold.ttf", 80);
+        titre.setFont(lobster);
         VBox titregrille = new VBox(titre, grid);
         grid.setMaxSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
 
@@ -159,7 +161,14 @@ public class HelloApplication extends Application {
                         boolean estBordure = (x == 0 || y == 0 || x == nbColonnes - 1 || y == nbLignes - 1);
                         if (estBordure) {
                             afficherMessage("Il y a un rocher !", messageBox);
-                        } else if (!estRocher && !estBordure) {
+                        }
+                        if (estLoup) {
+                            afficherMessage("Il y a un loup !", messageBox);
+                        }
+                        else if (estMouton) {
+                            afficherMessage("Il y a un mouton !", messageBox);
+                        }
+                        else if (!estRocher && !estBordure) {
                             cell.getChildren().clear();
                             grille.getElements().removeIf(e -> e.getX() == x && e.getY() == y && !(e instanceof Rocher));
                             ImageView marguerite = new ImageView(imgMarguerite);
@@ -172,6 +181,12 @@ public class HelloApplication extends Application {
                         boolean estBordure = (x == 0 || y == 0 || x == nbColonnes - 1 || y == nbLignes - 1);
                         if (estBordure) {
                             afficherMessage("Il y a un rocher !", messageBox);
+                        }
+                        if (estLoup) {
+                            afficherMessage("Il y a un loup !", messageBox);
+                        }
+                        else if (estMouton) {
+                            afficherMessage("Il y a un mouton !", messageBox);
                         }
                         else if (!estRocher) {
                             cell.getChildren().clear();
@@ -287,13 +302,17 @@ public class HelloApplication extends Application {
         menu1.setSpacing(50);
         HBox toutmenu = new HBox(20, menu, menu1,menu2);
         toutmenu.setAlignment(Pos.CENTER);
+        ImageView vlogo = new ImageView(logo);
+        vlogo.setFitWidth(300);
+        vlogo.setFitHeight(300);
+        VBox droite = new VBox(20, vlogo, toutmenu);
         VBox cont = new VBox(boutonRetour,container,demarrerbouton);
         cont.setSpacing(30);
         cont.setAlignment(Pos.CENTER_RIGHT);
         cont.setPrefSize(170, 500);
         titregrille.setAlignment(Pos.CENTER);
         titregrille.setSpacing(30);
-        HBox rootContent = new HBox(50, cont, titregrille, toutmenu);
+        HBox rootContent = new HBox(50, cont, titregrille, droite);
         rootContent.setSpacing(200);
         rootContent.setAlignment(Pos.CENTER);
 
