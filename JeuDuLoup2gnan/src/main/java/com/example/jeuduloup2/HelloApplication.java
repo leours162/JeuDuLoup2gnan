@@ -16,6 +16,7 @@ public class HelloApplication extends Application {
     private boolean moutonPlace = false;
     private boolean loupPlace = false;
     private boolean existSortie = false;
+    private Elements e;
 
     private StackPane creerBoutonImage(Image image, Runnable action) {
         ImageView icone = new ImageView(image);
@@ -117,7 +118,7 @@ public class HelloApplication extends Application {
                     boolean estRocher = ((grille.getElement(x,y)) instanceof Rocher);
                     boolean estLoup = ((grille.getElement(x,y)) instanceof Loup);
                     boolean estMouton = ((grille.getElement(x,y)) instanceof Mouton);
-                    if (modePlacement == null) return;
+                        if (modePlacement == null) return;
 
                     if ("mouton".equals(modePlacement) && !moutonPlace) {
                         boolean estBordure = (x == 0 || y == 0 || x == nbColonnes - 1 || y == nbLignes - 1);
@@ -207,9 +208,6 @@ public class HelloApplication extends Application {
                             }
                     } else if ("supprimer".equals(modePlacement)) {
                         boolean estBordure = (x == 0 || y == 0 || x == nbColonnes - 1 || y == nbLignes - 1);
-                        if (estBordure) {
-                            afficherMessage("Ne supprimez pas la bordure !", messageBox);
-                        }
                         if (!estBordure && grille.getElement(x,y) instanceof Mouton || grille.getElement(x,y) instanceof Loup) {
                             grille.remplacer(x,y,new Herbe(x,y));
                             ImageView fondHerbe = new ImageView(imgHerbe);
@@ -224,17 +222,18 @@ public class HelloApplication extends Application {
                             if (loupPlace && grille.getElement(x,y) instanceof Loup) {
                                 loupPlace = false;
                             }
+                            if (estBordure && grille.getElement(x,y) instanceof Herbe) {
+                                grille.remplacer(x,y,new Rocher(x,y));
+                                ImageView rocher = new ImageView(imgRocher);
+                                rocher.setFitWidth(TAILLE_CASE);
+                                rocher.setFitHeight(TAILLE_CASE);
+                                cell.getChildren().clear();
+                                cell.getChildren().add(rocher);
+                            }
 
                         }
                     } else if ("sortie".equals(modePlacement)) {
                         boolean estBordure = (x == 0 || y == 0 || x == nbColonnes - 1 || y == nbLignes - 1);
-                        if (existSortie) {
-                            boolean sortieEncoreValide = grille.sortieValide();
-                            if (sortieEncoreValide) {
-                                modePlacement = null;
-                                return;
-                            }
-                        }
                         if (estRocher && estBordure) {
                             if ((x == 0 && y == 0) || (x==nbColonnes-1 && y == 0) || (x == 0 && y == nbLignes-1) || (x == nbLignes-1 && y == nbColonnes-1)){
                                 afficherMessage("Pas les coins !", messageBox);
@@ -247,6 +246,7 @@ public class HelloApplication extends Application {
                                 cell.getChildren().add(herbe);
                                 modePlacement = null;
                                 existSortie = true;
+                                this.e=grille.getElement(x,y);
                             }
                         }
                     }
