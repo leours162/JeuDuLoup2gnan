@@ -64,9 +64,7 @@ public class HelloApplication extends Application {
         messageBox.setAlignment(Pos.TOP_LEFT);
         container.getChildren().add(messageBox);
 
-        VBox cont = new VBox(container);
-        cont.setAlignment(Pos.CENTER_RIGHT);
-        cont.setPrefSize(170, 500);
+
 
         Image imgFondHerbe = new Image(getClass().getResourceAsStream("/com/example/jeuduloup2/FondHerbe.png"));
         Image imgHerbe = new Image(getClass().getResourceAsStream("/com/example/jeuduloup2/herbe.png"));
@@ -77,9 +75,15 @@ public class HelloApplication extends Application {
         Image imgCactus = new Image(getClass().getResourceAsStream("/com/example/jeuduloup2/cactus.png"));
         Image imgSupprimer = new Image(getClass().getResourceAsStream("/com/example/jeuduloup2/supprimer.png"));
         Image imgSortie = new Image(getClass().getResourceAsStream("/com/example/jeuduloup2/sortie.png"));
+        Image imgRetour = new Image(getClass().getResourceAsStream("/com/example/jeuduloup2/retour.png"));
 
         GridPane grid = new GridPane();
+        Text titre = new Text("Créez le labyrinthe");
+        titre.setFont(new Font("Arial", 60));
+        titre.setStyle("-fx-fill: white;");
+        VBox titregrille = new VBox(titre, grid);
         grid.setMaxSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
+
 
         int nbLignes = grille.getNbLignes();
         int nbColonnes = grille.getNbColonnes();
@@ -153,7 +157,9 @@ public class HelloApplication extends Application {
                         }
                     } else if ("marguerite".equals(modePlacement)) {
                         boolean estBordure = (x == 0 || y == 0 || x == nbColonnes - 1 || y == nbLignes - 1);
-                        if (!estRocher && !estBordure) {
+                        if (estBordure) {
+                            afficherMessage("Il y a un rocher !", messageBox);
+                        } else if (!estRocher && !estBordure) {
                             cell.getChildren().clear();
                             grille.getElements().removeIf(e -> e.getX() == x && e.getY() == y && !(e instanceof Rocher));
                             ImageView marguerite = new ImageView(imgMarguerite);
@@ -164,7 +170,10 @@ public class HelloApplication extends Application {
                         }
                     } else if ("cactus".equals(modePlacement)) {
                         boolean estBordure = (x == 0 || y == 0 || x == nbColonnes - 1 || y == nbLignes - 1);
-                        if (!estRocher && !estBordure) {
+                        if (estBordure) {
+                            afficherMessage("Il y a un rocher !", messageBox);
+                        }
+                        else if (!estRocher) {
                             cell.getChildren().clear();
                             grille.getElements().removeIf(e -> e.getX() == x && e.getY() == y && !(e instanceof Rocher));
                             ImageView cactus = new ImageView(imgCactus);
@@ -173,8 +182,29 @@ public class HelloApplication extends Application {
                             cell.getChildren().add(cactus);
                             grille.getElements().add(new Cactus(x, y));
                         }
+                    }   else if ("rocher".equals(modePlacement)) {
+                            boolean estBordure = (x == 0 || y == 0 || x == nbColonnes - 1 || y == nbLignes - 1);
+                            if (estLoup) {
+                                afficherMessage("Il y a un loup !", messageBox);
+                            }
+                            else if (estMouton) {
+                                afficherMessage("Il y a un mouton !", messageBox);
+                            }
+                            else if (!estBordure) {
+                                cell.getChildren().clear();
+                                grille.getElements().removeIf(e -> e.getX() == x && e.getY() == y && !(e instanceof Rocher));
+                                ImageView rocher = new ImageView(imgRocher);
+                                rocher.setFitWidth(TAILLE_CASE);
+                                rocher.setFitHeight(TAILLE_CASE);
+                                cell.getChildren().add(rocher);
+                                grille.getElements().add(new Rocher(x, y));
+                            }
                     } else if ("supprimer".equals(modePlacement)) {
-                        if (!estRocher) {
+                        boolean estBordure = (x == 0 || y == 0 || x == nbColonnes - 1 || y == nbLignes - 1);
+                        if (estBordure) {
+                            afficherMessage("Ne supprimez pas la bordure !", messageBox);
+                        }
+                        if (!estBordure) {
                             grille.getElements().removeIf(e -> e.getX() == x && e.getY() == y && (e instanceof Mouton || e instanceof Loup));
 
                             ImageView fondHerbe = new ImageView(imgHerbe);
@@ -189,6 +219,7 @@ public class HelloApplication extends Application {
                             if (loupPlace && grille.getElements().stream().noneMatch(e -> e instanceof Loup)) {
                                 loupPlace = false;
                             }
+
                         }
                     } else if ("sortie".equals(modePlacement)) {
                         boolean estBordure = (x == 0 || y == 0 || x == nbColonnes - 1 || y == nbLignes - 1);
@@ -200,15 +231,19 @@ public class HelloApplication extends Application {
                             }
                         }
                         if (estRocher && estBordure) {
-                            grille.getElements().removeIf(e -> e.getX() == x && e.getY() == y && e instanceof Rocher);
-                            cell.getChildren().clear();
-                            ImageView herbe = new ImageView(imgHerbe);
-                            herbe.setFitWidth(TAILLE_CASE);
-                            herbe.setFitHeight(TAILLE_CASE);
-                            cell.getChildren().add(herbe);
-                            grille.getElements().add(new Herbe(x, y));
-                            modePlacement = null;
-                            existSortie = true;
+                            if ((x == 0 && y == 0) || (x==nbColonnes-1 && y == 0) || (x == 0 && y == nbLignes-1) || (x == nbLignes-1 && y == nbColonnes-1)){
+                                afficherMessage("Pas les coins !", messageBox);
+                            }else {
+                                grille.getElements().removeIf(e -> e.getX() == x && e.getY() == y && e instanceof Rocher);
+                                cell.getChildren().clear();
+                                ImageView herbe = new ImageView(imgHerbe);
+                                herbe.setFitWidth(TAILLE_CASE);
+                                herbe.setFitHeight(TAILLE_CASE);
+                                cell.getChildren().add(herbe);
+                                grille.getElements().add(new Herbe(x, y));
+                                modePlacement = null;
+                                existSortie = true;
+                            }
                         }
                     }
                 });
@@ -223,16 +258,42 @@ public class HelloApplication extends Application {
         StackPane boutonCactus = creerBoutonImage(imgCactus, () -> modePlacement = "cactus");
         StackPane boutonSupprimer = creerBoutonImage(imgSupprimer, () -> modePlacement = "supprimer");
         StackPane boutonSortie = creerBoutonImage(imgSortie, () -> modePlacement = "sortie");
+        StackPane boutonRocher = creerBoutonImage(imgRocher, () -> modePlacement = "rocher");
+        StackPane boutonRetour = creerBoutonImage(imgRetour, () -> modePlacement = "retour");
+
+        Text demarrer = new Text("Démarrer");
+        demarrer.setFont(new Font("Arial", 40));
+        demarrer.setStyle("-fx-fill: white;");
+        StackPane demarrerbouton = new StackPane(demarrer);
+        demarrerbouton.setPrefSize(150, 150);
+        demarrerbouton.setStyle("""
+            -fx-background-color: rgba(255, 255, 255, 0.1);
+            -fx-border-color: white;
+            -fx-border-width: 2px;
+            -fx-border-radius: 15px;
+            -fx-background-radius: 15px;
+            -fx-cursor: hand;
+        """);
+
+
 
         VBox menu = new VBox(20, boutonMouton, boutonLoup, boutonMarguerite);
         menu.setAlignment(Pos.CENTER);
         VBox menu1 = new VBox(20, boutonCactus, boutonSupprimer, boutonSortie);
         menu1.setAlignment(Pos.CENTER);
+        VBox menu2 = new VBox(20, boutonRocher);
+        menu2.setAlignment(Pos.CENTER);
         menu.setSpacing(50);
         menu1.setSpacing(50);
-        HBox toutmenu = new HBox(20, menu, menu1);
+        HBox toutmenu = new HBox(20, menu, menu1,menu2);
         toutmenu.setAlignment(Pos.CENTER);
-        HBox rootContent = new HBox(50, cont, grid, toutmenu);
+        VBox cont = new VBox(boutonRetour,container,demarrerbouton);
+        cont.setSpacing(30);
+        cont.setAlignment(Pos.CENTER_RIGHT);
+        cont.setPrefSize(170, 500);
+        titregrille.setAlignment(Pos.CENTER);
+        titregrille.setSpacing(30);
+        HBox rootContent = new HBox(50, cont, titregrille, toutmenu);
         rootContent.setSpacing(200);
         rootContent.setAlignment(Pos.CENTER);
 
