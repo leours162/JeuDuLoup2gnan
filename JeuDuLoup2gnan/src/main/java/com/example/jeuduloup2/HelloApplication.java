@@ -95,12 +95,15 @@ public class HelloApplication extends Application {
                 StackPane cell = new StackPane();
                 cell.setPrefSize(TAILLE_CASE, TAILLE_CASE);
 
-                for (Elements e : grille.getElements()) {
-                    if (e.getX() == j && e.getY() == i && e instanceof Herbe) {
-                        ImageView herbe = new ImageView(imgHerbe);
-                        herbe.setFitWidth(TAILLE_CASE);
-                        herbe.setFitHeight(TAILLE_CASE);
-                        cell.getChildren().add(herbe);
+
+                for (int k=0;k<=grille.getNbColonnes();k++){
+                    for (int l=0;l<=grille.getNbLignes();l++){
+                        if(grille.getElement(k,l) instanceof Herbe){
+                            ImageView herbe = new ImageView(imgHerbe);
+                            herbe.setFitWidth(TAILLE_CASE);
+                            herbe.setFitHeight(TAILLE_CASE);
+                            cell.getChildren().add(herbe);
+                        }
                     }
                 }
 
