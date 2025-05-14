@@ -18,6 +18,9 @@ public class Grille {
         //nul, a changer (plutot get element x y comme matrice )
         return elements;
     }
+    public Elements getElement(int x, int y){
+        return elements.get(x+y*nbColonnes);
+    }
     public int getNbLignes() {
         return nbLignes;
     }
