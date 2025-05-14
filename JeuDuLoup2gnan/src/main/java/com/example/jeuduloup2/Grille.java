@@ -11,15 +11,12 @@ public class Grille {
         this.elements = new Elements[this.nbColonnes][this.nbLignes];
     }
 
-    public Elements getElement(int x, int y) {
-        return elements[x][y];
-    }
 
     public void setElement(int x, int y, Elements e) {
         elements[x][y] = e;
     }
     public Elements getElement(int x, int y){
-        return elements.get(x+y*nbColonnes);
+        return elements[x][y];
     }
 
     public int getNbLignes() {
