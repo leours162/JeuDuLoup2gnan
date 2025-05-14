@@ -112,7 +112,7 @@ public class Grille {
         }
         return true;
     }
-    private void remplacer (int x, int y,Elements e) {
+    public void remplacer (int x, int y,Elements e) {
         elements[x][y] = e;
     }
 }

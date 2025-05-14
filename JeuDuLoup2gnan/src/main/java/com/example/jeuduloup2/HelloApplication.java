@@ -96,34 +96,27 @@ public class HelloApplication extends Application {
                 cell.setPrefSize(TAILLE_CASE, TAILLE_CASE);
 
 
-                for (int k=0;k<=grille.getNbColonnes();k++){
-                    for (int l=0;l<=grille.getNbLignes();l++){
-                        if(grille.getElement(k,l) instanceof Herbe){
-                            ImageView herbe = new ImageView(imgHerbe);
-                            herbe.setFitWidth(TAILLE_CASE);
-                            herbe.setFitHeight(TAILLE_CASE);
-                            cell.getChildren().add(herbe);
-                        }
-                    }
-                }
+                Elements e = grille.getElement(j, i);
 
-                for (Elements e : grille.getElements()) {
-                    if (e.getX() == j && e.getY() == i && e instanceof Rocher) {
-                        ImageView rocher = new ImageView(imgRocher);
-                        rocher.setFitWidth(TAILLE_CASE);
-                        rocher.setFitHeight(TAILLE_CASE);
-                        cell.getChildren().add(rocher);
-                    }
+                if (e instanceof Rocher) {
+                    ImageView rocher = new ImageView(imgRocher);
+                    rocher.setFitWidth(TAILLE_CASE);
+                    rocher.setFitHeight(TAILLE_CASE);
+                    cell.getChildren().add(rocher);
+                } else if (e instanceof Herbe) {
+                    ImageView herbe = new ImageView(imgHerbe);
+                    herbe.setFitWidth(TAILLE_CASE);
+                    herbe.setFitHeight(TAILLE_CASE);
+                    cell.getChildren().add(herbe);
                 }
 
                 final int x = j;
                 final int y = i;
 
                 cell.setOnMouseClicked(event -> {
-                    boolean estRocher = grille.getElements().stream().anyMatch(e -> e.getX() == x && e.getY() == y && e instanceof Rocher);
-                    boolean estLoup = grille.getElements().stream().anyMatch(e -> e.getX() == x && e.getY() == y && e instanceof Loup);
-                    boolean estMouton = grille.getElements().stream().anyMatch(e -> e.getX() == x && e.getY() == y && e instanceof Mouton);
-
+                    boolean estRocher = ((grille.getElement(x,y)) instanceof Rocher);
+                    boolean estLoup = ((grille.getElement(x,y)) instanceof Loup);
+                    boolean estMouton = ((grille.getElement(x,y)) instanceof Mouton);
                     if (modePlacement == null) return;
 
                     if ("mouton".equals(modePlacement) && !moutonPlace) {
@@ -134,12 +127,11 @@ public class HelloApplication extends Application {
                             afficherMessage("Il y a un loup !", messageBox);
                         } else if (!estBordure) {
                             cell.getChildren().clear();
-                            grille.getElements().removeIf(e -> e.getX() == x && e.getY() == y && !(e instanceof Rocher));
+                            grille.remplacer(x,y,new Mouton(x,y));
                             ImageView mouton = new ImageView(imgMouton);
                             mouton.setFitWidth(TAILLE_CASE);
                             mouton.setFitHeight(TAILLE_CASE);
                             cell.getChildren().add(mouton);
-                            grille.getElements().add(new Mouton(x, y));
                             moutonPlace = true;
                             modePlacement = null;
                         }
@@ -151,12 +143,11 @@ public class HelloApplication extends Application {
                             afficherMessage("Il y a un mouton !", messageBox);
                         } else if (!estBordure) {
                             cell.getChildren().clear();
-                            grille.getElements().removeIf(e -> e.getX() == x && e.getY() == y && !(e instanceof Rocher));
+                            grille.remplacer(x,y,new Loup(x,y));
                             ImageView loup = new ImageView(imgLoup);
                             loup.setFitWidth(TAILLE_CASE);
                             loup.setFitHeight(TAILLE_CASE);
                             cell.getChildren().add(loup);
-                            grille.getElements().add(new Loup(x, y));
                             loupPlace = true;
                             modePlacement = null;
                         }
@@ -173,12 +164,11 @@ public class HelloApplication extends Application {
                         }
                         else if (!estRocher && !estBordure) {
                             cell.getChildren().clear();
-                            grille.getElements().removeIf(e -> e.getX() == x && e.getY() == y && !(e instanceof Rocher));
+                            grille.remplacer(x,y,new Marguerite(x,y));
                             ImageView marguerite = new ImageView(imgMarguerite);
                             marguerite.setFitWidth(TAILLE_CASE);
                             marguerite.setFitHeight(TAILLE_CASE);
                             cell.getChildren().add(marguerite);
-                            grille.getElements().add(new Marguerite(x, y));
                         }
                     } else if ("cactus".equals(modePlacement)) {
                         boolean estBordure = (x == 0 || y == 0 || x == nbColonnes - 1 || y == nbLignes - 1);
@@ -193,12 +183,11 @@ public class HelloApplication extends Application {
                         }
                         else if (!estRocher) {
                             cell.getChildren().clear();
-                            grille.getElements().removeIf(e -> e.getX() == x && e.getY() == y && !(e instanceof Rocher));
+                            grille.remplacer(x,y,new Mouton(x,y));
                             ImageView cactus = new ImageView(imgCactus);
                             cactus.setFitWidth(TAILLE_CASE);
                             cactus.setFitHeight(TAILLE_CASE);
                             cell.getChildren().add(cactus);
-                            grille.getElements().add(new Cactus(x, y));
                         }
                     }   else if ("rocher".equals(modePlacement)) {
                             boolean estBordure = (x == 0 || y == 0 || x == nbColonnes - 1 || y == nbLignes - 1);
@@ -210,31 +199,29 @@ public class HelloApplication extends Application {
                             }
                             else if (!estBordure) {
                                 cell.getChildren().clear();
-                                grille.getElements().removeIf(e -> e.getX() == x && e.getY() == y && !(e instanceof Rocher));
+                                grille.remplacer(x,y,new Rocher(x,y));
                                 ImageView rocher = new ImageView(imgRocher);
                                 rocher.setFitWidth(TAILLE_CASE);
                                 rocher.setFitHeight(TAILLE_CASE);
                                 cell.getChildren().add(rocher);
-                                grille.getElements().add(new Rocher(x, y));
                             }
                     } else if ("supprimer".equals(modePlacement)) {
                         boolean estBordure = (x == 0 || y == 0 || x == nbColonnes - 1 || y == nbLignes - 1);
                         if (estBordure) {
                             afficherMessage("Ne supprimez pas la bordure !", messageBox);
                         }
-                        if (!estBordure) {
-                            grille.getElements().removeIf(e -> e.getX() == x && e.getY() == y && (e instanceof Mouton || e instanceof Loup));
-
+                        if (!estBordure && grille.getElement(x,y) instanceof Mouton || grille.getElement(x,y) instanceof Loup) {
+                            grille.remplacer(x,y,new Herbe(x,y));
                             ImageView fondHerbe = new ImageView(imgHerbe);
                             fondHerbe.setFitWidth(TAILLE_CASE);
                             fondHerbe.setFitHeight(TAILLE_CASE);
                             cell.getChildren().clear();
                             cell.getChildren().add(fondHerbe);
 
-                            if (moutonPlace && grille.getElements().stream().noneMatch(e -> e instanceof Mouton)) {
+                            if (moutonPlace && grille.getElement(x,y) instanceof Mouton) {
                                 moutonPlace = false;
                             }
-                            if (loupPlace && grille.getElements().stream().noneMatch(e -> e instanceof Loup)) {
+                            if (loupPlace && grille.getElement(x,y) instanceof Loup) {
                                 loupPlace = false;
                             }
 
@@ -251,14 +238,13 @@ public class HelloApplication extends Application {
                         if (estRocher && estBordure) {
                             if ((x == 0 && y == 0) || (x==nbColonnes-1 && y == 0) || (x == 0 && y == nbLignes-1) || (x == nbLignes-1 && y == nbColonnes-1)){
                                 afficherMessage("Pas les coins !", messageBox);
-                            }else {
-                                grille.getElements().removeIf(e -> e.getX() == x && e.getY() == y && e instanceof Rocher);
+                            }else if (grille.getElement(x,y) instanceof Rocher) {
+                                grille.remplacer(x,y,new Herbe(x,y));
                                 cell.getChildren().clear();
                                 ImageView herbe = new ImageView(imgHerbe);
                                 herbe.setFitWidth(TAILLE_CASE);
                                 herbe.setFitHeight(TAILLE_CASE);
                                 cell.getChildren().add(herbe);
-                                grille.getElements().add(new Herbe(x, y));
                                 modePlacement = null;
                                 existSortie = true;
                             }
