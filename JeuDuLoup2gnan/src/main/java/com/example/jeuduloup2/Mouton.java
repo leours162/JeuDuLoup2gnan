@@ -1,20 +1,16 @@
 package com.example.jeuduloup2;
 
-import com.example.jeuduloup2.Animal;
-
 public class Mouton extends Animal {
     private int nbCactus;
     private int nbHerbe;
     private int nbMarguerite;
 
-
-    public Mouton(int x,int y) {
-        super(2,x,y);
+    public Mouton(int x, int y) {
+        super(2, x, y);
         this.nbCactus = 0;
         this.nbHerbe = 0;
         this.nbMarguerite = 0;
     }
-
 
     public int getNbCactus() {
         return nbCactus;
@@ -40,8 +36,14 @@ public class Mouton extends Animal {
         this.nbMarguerite = nbMarguerite;
     }
 
-
-    public void Manger (int nutrition){
+    public void manger(int nutrition) {
         this.setVitesse(nutrition);
+        if (nutrition == 1) {
+            nbCactus++;
+        } else if (nutrition == 2) {
+            nbHerbe++;
+        } else if (nutrition == 4) {
+            nbMarguerite++;
+        }
     }
 }
