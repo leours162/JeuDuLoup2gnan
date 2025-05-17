@@ -4,13 +4,14 @@ public class Vegetaux extends Elements {
     protected int nutrition;
     protected boolean libre;
 
-    public Vegetaux(int nutrition,int x,int y) {
-        super(x,y);
+    public Vegetaux(int nutrition, int x, int y) {
+        super(x, y);
         this.nutrition = nutrition;
         this.libre = true;
     }
 
-    public Vegetaux(){
+    public Vegetaux() {
+        super();
         this.nutrition = 0;
         this.libre = false;
     }
@@ -19,6 +20,15 @@ public class Vegetaux extends Elements {
         return nutrition;
     }
 
+    public void setNutrition(int nutrition) {
+        this.nutrition = nutrition;
+    }
+
     public boolean isLibre() {
         return libre;
-    }}
+    }
+
+    public void setLibre(boolean libre) {
+        this.libre = libre;
+    }
+}
