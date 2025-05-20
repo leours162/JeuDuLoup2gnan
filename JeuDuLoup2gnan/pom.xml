@@ -75,7 +75,7 @@
                         <!-- Default configuration for running with: mvn clean javafx:run -->
                         <id>default-cli</id>
                         <configuration>
-                            <mainClass>com.example.jeuduloup2/com.example.jeuduloup2.Jeu</mainClass>
+                            <mainClass>com.example.jeuduloup2/com.example.jeuduloup2.View.JeuView</mainClass>
                             <launcher>app</launcher>
                             <jlinkZipName>app</jlinkZipName>
                             <jlinkImageName>app</jlinkImageName>
