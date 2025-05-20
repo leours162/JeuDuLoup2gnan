@@ -1,5 +1,6 @@
-package com.example.jeuduloup2;
+package com.example.jeuduloup2.View;
 
+import com.example.jeuduloup2.*;
 import javafx.application.Application;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -10,7 +11,7 @@ import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
-public class Jeu extends Application {
+public class JeuView extends Application {
     private final int TAILLE_CASE = 60;
     private String modePlacement = null;
     private boolean moutonPlace = false;
@@ -78,7 +79,6 @@ public class Jeu extends Application {
         Image imgSortie = new Image(getClass().getResourceAsStream("/com/example/jeuduloup2/sortie.png"));
         Image imgRetour = new Image(getClass().getResourceAsStream("/com/example/jeuduloup2/retour.png"));
         Image logo = new Image(getClass().getResourceAsStream("/com/example/jeuduloup2/logo.png"));
-        Image imgReset = new Image(getClass().getResourceAsStream("/com/example/jeuduloup2/reset.png"));
 
         GridPane grid = new GridPane();
         Text titre = new Text("Créez le labyrinthe");

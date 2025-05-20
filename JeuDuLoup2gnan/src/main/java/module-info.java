@@ -8,4 +8,6 @@ module com.example.jeuduloup2 {
 
     opens com.example.jeuduloup2 to javafx.fxml;
     exports com.example.jeuduloup2;
+    exports com.example.jeuduloup2.View;
+    opens com.example.jeuduloup2.View to javafx.fxml;
 }
