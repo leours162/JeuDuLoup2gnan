@@ -18,6 +18,8 @@ public class JeuView extends Application {
     private boolean loupPlace = false;
     private boolean existSortie = false;
     private Elements e;
+    public int nbColonnes;
+    public int nbLignes;
 
     private StackPane creerBoutonImage(Image image, Runnable action) {
         ImageView icone = new ImageView(image);
@@ -37,6 +39,11 @@ public class JeuView extends Application {
 
         container.setOnMouseClicked(e -> action.run());
         return container;
+    }
+
+    public void setgrille(int x, int y){
+        this.nbColonnes = x;
+        this.nbLignes = y;
     }
 
     private void afficherMessage(String contenu, VBox messageBox) {
@@ -88,8 +95,8 @@ public class JeuView extends Application {
         grid.setMaxSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
 
 
-        int nbLignes = grille.getNbLignes();
-        int nbColonnes = grille.getNbColonnes();
+        int nbLignes = this.nbLignes;
+        int nbColonnes = this.nbColonnes;
 
         for (int i = 0; i < nbLignes; i++) {
             for (int j = 0; j < nbColonnes; j++) {
@@ -271,7 +278,10 @@ public class JeuView extends Application {
         StackPane boutonSupprimer = creerBoutonImage(imgSupprimer, () -> modePlacement = "supprimer");
         StackPane boutonSortie = creerBoutonImage(imgSortie, () -> modePlacement = "sortie");
         StackPane boutonRocher = creerBoutonImage(imgRocher, () -> modePlacement = "rocher");
-        StackPane boutonRetour = creerBoutonImage(imgRetour, () -> modePlacement = "retour");
+        StackPane boutonRetour = creerBoutonImage(imgRetour, () -> {
+            new GrilleView().start(new Stage());
+            primaryStage.close();
+        });
 
         Text demarrer = new Text("Démarrer");
         demarrer.setFont(new Font("Arial", 40));
