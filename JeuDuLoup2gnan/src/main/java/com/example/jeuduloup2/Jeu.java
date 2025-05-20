@@ -10,7 +10,7 @@ import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
-public class HelloApplication extends Application {
+public class Jeu extends Application {
     private final int TAILLE_CASE = 60;
     private String modePlacement = null;
     private boolean moutonPlace = false;
@@ -78,12 +78,12 @@ public class HelloApplication extends Application {
         Image imgSortie = new Image(getClass().getResourceAsStream("/com/example/jeuduloup2/sortie.png"));
         Image imgRetour = new Image(getClass().getResourceAsStream("/com/example/jeuduloup2/retour.png"));
         Image logo = new Image(getClass().getResourceAsStream("/com/example/jeuduloup2/logo.png"));
+        Image imgReset = new Image(getClass().getResourceAsStream("/com/example/jeuduloup2/reset.png"));
 
         GridPane grid = new GridPane();
         Text titre = new Text("Créez le labyrinthe");
         titre.setStyle("-fx-fill: white;");
-        Font lobster = Font.loadFont("file:/home/etu/Téléchargements/unkempt/Unkempt-Bold.ttf", 80);
-        titre.setFont(lobster);
+        Font lobster = Font.loadFont(getClass().getResourceAsStream("/fonts/Unkempt-Bold.ttf"), 80);        titre.setFont(lobster);
         VBox titregrille = new VBox(titre, grid);
         grid.setMaxSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
 
@@ -118,6 +118,7 @@ public class HelloApplication extends Application {
                     boolean estRocher = ((grille.getElement(x,y)) instanceof Rocher);
                     boolean estLoup = ((grille.getElement(x,y)) instanceof Loup);
                     boolean estMouton = ((grille.getElement(x,y)) instanceof Mouton);
+                    boolean estSortie = ((grille.getElement(x,y)) instanceof Sortie);
                         if (modePlacement == null) return;
 
                     if ("mouton".equals(modePlacement) && !moutonPlace) {
@@ -208,37 +209,44 @@ public class HelloApplication extends Application {
                             }
                     } else if ("supprimer".equals(modePlacement)) {
                         boolean estBordure = (x == 0 || y == 0 || x == nbColonnes - 1 || y == nbLignes - 1);
-                        if (!estBordure && grille.getElement(x,y) instanceof Mouton || grille.getElement(x,y) instanceof Loup) {
-                            grille.remplacer(x,y,new Herbe(x,y));
-                            ImageView fondHerbe = new ImageView(imgHerbe);
-                            fondHerbe.setFitWidth(TAILLE_CASE);
-                            fondHerbe.setFitHeight(TAILLE_CASE);
+                        Elements element = grille.getElement(x,y);
+                        if (estSortie){
+                            grille.remplacer(x,y,new Rocher(x,y));
+                            ImageView rocher = new ImageView(imgRocher);
+                            rocher.setFitWidth(TAILLE_CASE);
+                            rocher.setFitHeight(TAILLE_CASE);
                             cell.getChildren().clear();
-                            cell.getChildren().add(fondHerbe);
-
-                            if (moutonPlace && grille.getElement(x,y) instanceof Mouton) {
-                                moutonPlace = false;
-                            }
-                            if (loupPlace && grille.getElement(x,y) instanceof Loup) {
-                                loupPlace = false;
-                            }
-                            if (estBordure && grille.getElement(x,y) instanceof Herbe) {
-                                grille.remplacer(x,y,new Rocher(x,y));
-                                ImageView rocher = new ImageView(imgRocher);
-                                rocher.setFitWidth(TAILLE_CASE);
-                                rocher.setFitHeight(TAILLE_CASE);
+                            cell.getChildren().add(rocher);
+                            existSortie = false;
+                        }
+                        else if (estBordure) {
+                            afficherMessage("Pas la bordure!", messageBox);
+                        }
+                        else {
+                                grille.remplacer(x,y,new Herbe(x,y));
+                                ImageView fondHerbe = new ImageView(imgHerbe);
+                                fondHerbe.setFitWidth(TAILLE_CASE);
+                                fondHerbe.setFitHeight(TAILLE_CASE);
                                 cell.getChildren().clear();
-                                cell.getChildren().add(rocher);
-                            }
+                                cell.getChildren().add(fondHerbe);
 
+                                if (element instanceof Mouton) {
+                                    moutonPlace = false;
+                                }
+                                if (element instanceof Loup) {
+                                    loupPlace = false;
+                                }
                         }
                     } else if ("sortie".equals(modePlacement)) {
                         boolean estBordure = (x == 0 || y == 0 || x == nbColonnes - 1 || y == nbLignes - 1);
-                        if (estRocher && estBordure) {
+                        if (existSortie){
+                            afficherMessage("Il y a déjà une sortie !", messageBox);
+                        }
+                        else if (estRocher && estBordure) {
                             if ((x == 0 && y == 0) || (x==nbColonnes-1 && y == 0) || (x == 0 && y == nbLignes-1) || (x == nbLignes-1 && y == nbColonnes-1)){
                                 afficherMessage("Pas les coins !", messageBox);
                             }else if (grille.getElement(x,y) instanceof Rocher) {
-                                grille.remplacer(x,y,new Herbe(x,y));
+                                grille.remplacer(x,y,new Sortie(x,y));
                                 cell.getChildren().clear();
                                 ImageView herbe = new ImageView(imgHerbe);
                                 herbe.setFitWidth(TAILLE_CASE);
