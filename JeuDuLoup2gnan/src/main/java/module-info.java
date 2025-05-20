@@ -5,6 +5,7 @@ module com.example.jeuduloup2 {
     requires org.controlsfx.controls;
     requires com.dlsc.formsfx;
     requires java.xml;
+    requires javafx.media;
 
     opens com.example.jeuduloup2 to javafx.fxml;
     exports com.example.jeuduloup2;

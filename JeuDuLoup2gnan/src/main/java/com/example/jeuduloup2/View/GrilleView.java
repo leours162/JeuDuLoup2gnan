@@ -65,6 +65,7 @@ public class GrilleView extends Application {
         valider.setOnAction(e -> {
             int largeur = spinnerLongueur.getValue();
             int hauteur = spinnerHauteur.getValue();
+            new JeuView().start(new Stage());
             stage.close();
         });
 

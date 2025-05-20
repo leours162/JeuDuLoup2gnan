@@ -11,11 +11,14 @@ import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import com.example.jeuduloup2.View.GrilleView;
-
+import javafx.scene.media.Media;
+import javafx.scene.media.MediaPlayer;
 import static javafx.application.Application.launch;
 
 
 public class MenuView extends Application {
+    private boolean musique = false;
+
     private StackPane creerBoutonImage(Text text, Runnable action) {
         text.setFont(Font.font("Verdana", FontWeight.BOLD, 50));
         text.setStyle("-fx-fill: white;");
@@ -37,11 +40,19 @@ public class MenuView extends Application {
 
     @Override
     public void start(Stage primaryStage) {
+        if (!musique) {
+            SoundManager.initMusic();
+            musique = true;
+        }
+
         StackPane demarrer = creerBoutonImage(new Text("Démarrer"), () -> {
             new GrilleView().start(new Stage());
             primaryStage.close();
         });
-        StackPane options = creerBoutonImage(new Text("Options"), () -> {});
+        StackPane options = creerBoutonImage(new Text("Options"), () -> {
+            new ParamsView().start(new Stage());
+            primaryStage.close();
+        });
         StackPane quitter = creerBoutonImage(new Text("Quitter"), () -> {primaryStage.close();});
         VBox vBox1 = new VBox(demarrer, options, quitter);
         vBox1.setSpacing(20);
