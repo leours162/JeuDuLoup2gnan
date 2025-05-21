@@ -288,6 +288,20 @@ public class Grille {
         res[15][1] = y;
         return res;
     }
+    public boolean seDeplacer(Animal a,int x, int y) {
+        int[][] deplacements= lesDeplacements(a);
+        boolean possible = false;
+        for (int i=0; i<deplacements.length; i++) {
+            if (deplacements[i][0] == x && deplacements[i][1] == y) {
+                possible = true;
+            }
+        }
+        if (possible) {
+            a.setX(x);
+            a.setY(y);
+        }
+        return possible;
+    }
 }
 
 
