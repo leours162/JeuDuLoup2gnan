@@ -154,19 +154,28 @@ public class Grille {
 
         }
 
-        ArrayList<int[]> a= new ArrayList<>();
-        ArrayList<int[]> b= new ArrayList<>();
-        for (int i= 0; i <v*(2+v*2); i++) {
-            a.add(res[i]);
-        }
-        for (int i= 0; i <v*(2+v*2); i++) {
-            if ((!(a.get(i)[0]>=nbColonnes || a.get(i)[1] >= nbLignes || a.get(i)[0] < 0 || a.get(i)[1] < 0)) && (elements[a.get(i)[0]][a.get(i)[1]].isAccessible() )){
-                b.add(a.get(i));;
+        ArrayList<int[]> coordonneesValides = new ArrayList<>();
+
+        for (int i = 0; i < v * (2 + v * 2); i++) {
+            int[] coord = res[i];
+            int targetX = coord[0];
+            int targetY = coord[1];
+
+            // Vérifier que les coordonnées sont dans les limites et la case est accessible
+            if (targetX >= 0 && targetX < nbColonnes && targetY >= 0 && targetY < nbLignes &&
+                    elements[targetX][targetY].isAccessible()) {
+
+                // Vérifier s'il n'y a pas d'obstacle entre la position actuelle et la position cible
+                if (cheminLibre(x, y, targetX, targetY)) {
+                    coordonneesValides.add(coord);
+                }
             }
         }
-        int[][] res2= new int[b.size()][2];
-        for (int i= 0; i <b.size(); i++) {
-            res2[i]=b.get(i);
+
+        // Convertir la liste filtrée en tableau 2D
+        int[][] res2 = new int[coordonneesValides.size()][2];
+        for (int i = 0; i < coordonneesValides.size(); i++) {
+            res2[i] = coordonneesValides.get(i);
         }
         return res2;
 
@@ -282,6 +291,49 @@ public class Grille {
         res[15][1] = y;
         return res;
     }
+    private boolean cheminLibre(int x1, int y1, int x2, int y2) {
+
+        if ((Math.abs(x2 - x1) <= 1 && Math.abs(y2 - y1) <= 1)) {
+            return true;
+        }
+
+
+        int dx = Math.abs(x2 - x1);
+        int dy = Math.abs(y2 - y1);
+        int sx = x1 < x2 ? 1 : -1;
+        int sy = y1 < y2 ? 1 : -1;
+        int err = dx - dy;
+
+
+        int currentX = x1;
+        int currentY = y1;
+
+        while (currentX != x2 || currentY != y2) {
+
+            int e2 = 2 * err;
+            if (e2 > -dy) {
+                err -= dy;
+                currentX += sx;
+            }
+            if (e2 < dx) {
+                err += dx;
+                currentY += sy;
+            }
+
+
+            if (currentX != x2 || currentY != y2) {
+
+                if (currentX < 0 || currentX >= nbColonnes ||
+                        currentY < 0 || currentY >= nbLignes ||
+                        !elements[currentX][currentY].isAccessible()) {
+                    return false;
+                }
+            }
+        }
+
+
+        return true;}
+
     public boolean seDeplacer(Animal a,int x, int y) {
         int[][] deplacements= lesDeplacements(a);
         boolean possible = false;
