@@ -303,7 +303,7 @@ public class JeuView extends Application {
 
                     incrementerTour();
                     animal = !animal;
-                    messageLabel.setText("Sélectionnez un " + (animal ? "loup" : "mouton"));
+                    messageLabel.setText("Sélectionnez le " + (animal ? "loup" : "mouton"));
                 }
 
                 animalSelected = false;
