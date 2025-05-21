@@ -291,8 +291,7 @@ public class Grille {
             }
         }
         if (possible) {
-            a.setX(x);
-            a.setY(y);
+            a.bouger(x,y);
         }
         return possible;
     }
