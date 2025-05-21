@@ -119,8 +119,6 @@ public class Grille {
         int v= e.getVitesse();
         int x= e.getX();
         int y= e.getY();
-        int colonnes= this.getNbColonnes();
-        int lignes= this.getNbLignes();
         int[][] res =new int[v*(2+v*2)][2];
         if (v>=1){
             int[][] res1 = lesVoisins(x,y);
