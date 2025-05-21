@@ -236,7 +236,7 @@ public class JeuView extends Application {
                 animalSelectedY = y;
                 animalSelected = true;
 
-                messageLabel.setText("Sélectionne une destination");
+                messageLabel.setText("Sélectionnez une destination");
 
                 afficherDeplacementsPossibles((Animal) element);
             }
@@ -303,7 +303,7 @@ public class JeuView extends Application {
 
                     incrementerTour();
                     animal = !animal;
-                    messageLabel.setText("Sélectionne un " + (animal ? "loup" : "mouton"));
+                    messageLabel.setText("Sélectionnez un " + (animal ? "loup" : "mouton"));
                 }
 
                 animalSelected = false;
