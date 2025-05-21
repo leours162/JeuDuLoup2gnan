@@ -17,6 +17,8 @@ import javafx.stage.Stage;
 import javafx.scene.control.ToggleGroup;
 public class ParamsView extends Application {
 
+    public boolean animal = true;
+
     private StackPane creerBoutonImage(Image image, Runnable action) {
         ImageView icone = new ImageView(image);
         icone.setFitWidth(140);
@@ -98,10 +100,12 @@ public class ParamsView extends Application {
         RadioButton Loup = new RadioButton("Loup");
         Loup.setToggleGroup(groupe);
         Loup.setStyle("-fx-font-size: 30px; -fx-text-fill: white;");
+        Loup.setOnMouseClicked(e -> this.animal=false);
 
         RadioButton Mouton = new RadioButton("Mouton");
         Mouton.setToggleGroup(groupe);
         Mouton.setStyle("-fx-font-size: 30px; -fx-text-fill: white;");
+        Mouton.setOnMouseClicked(e -> this.animal=true);
 
         VBox blocSysteme = new VBox(10, Systeme, systeme, Loup, Mouton);
         blocSysteme.setStyle("-fx-background-color: rgba(255, 255, 255, 0.1); -fx-background-radius: 30px;");
@@ -128,6 +132,10 @@ public class ParamsView extends Application {
         stage.setScene(scene);
         stage.setResizable(false);
         stage.show();
+    }
+
+    public boolean getAnimal(){
+        return this.animal;
     }
 
     public static void main(String[] args) {
