@@ -9,6 +9,7 @@ public abstract class Animal extends Elements {
         this.vitesse = vitesse;
         this.vivant = true;
     }
+    
 
     public Animal() {
         super();
