@@ -74,26 +74,24 @@ public class Grille {
     public boolean estConnexe() {
         boolean[][] visite = new boolean[nbColonnes][nbLignes];
 
-        // Trouver une case Herbe pour démarrer
+        // Trouver une case accessible pour démarrer
         for (int y = 0; y < nbLignes; y++) {
             for (int x = 0; x < nbColonnes; x++) {
-                if (elements[x][y] instanceof Herbe) {
-                    // Lancer le DFS
+                if (elements[x][y] != null && elements[x][y].isAccessible()) {
                     explorer(x, y, visite);
-                    // Vérifier ensuite si tout est visité
                     return verifierConnexite(visite);
                 }
             }
         }
 
-        // Aucune case Herbe trouvée
+        // Aucune case accessible trouvée
         return false;
     }
 
     private void explorer(int x, int y, boolean[][] visite) {
         if (x < 0 || x >= nbColonnes || y < 0 || y >= nbLignes) return;
         if (visite[x][y]) return;
-        if (!(elements[x][y] instanceof Herbe || elements[x][y] instanceof Sortie)) return;
+        if (!elements[x][y].isAccessible()) return;
 
         visite[x][y] = true;
 
@@ -102,18 +100,16 @@ public class Grille {
         explorer(x, y + 1, visite);
         explorer(x, y - 1, visite);
     }
-
     private boolean verifierConnexite(boolean[][] visite) {
         for (int y = 0; y < nbLignes; y++) {
             for (int x = 0; x < nbColonnes; x++) {
-                if ((elements[x][y] instanceof Herbe || elements[x][y] instanceof Sortie) && !visite[x][y]) {
+                if (elements[x][y] != null && elements[x][y].isAccessible() && !visite[x][y]) {
                     return false;
                 }
             }
         }
         return true;
     }
-
     public void remplacer(int x, int y, Elements e) {
         elements[x][y] = e;
     }
