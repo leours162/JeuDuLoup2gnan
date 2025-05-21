@@ -4,6 +4,7 @@ import com.example.jeuduloup2.*;
 import javafx.application.Application;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
@@ -17,9 +18,12 @@ public class MiseEnPlaceView extends Application {
     private boolean moutonPlace = false;
     private boolean loupPlace = false;
     private boolean existSortie = false;
+    private boolean existMouton = false;
+    private boolean existLoup = false;
     private Elements e;
     public int nbColonnes;
     public int nbLignes;
+    private boolean estConnexe = false;
 
     private StackPane creerBoutonImage(Image image, Runnable action) {
         ImageView icone = new ImageView(image);
@@ -126,6 +130,7 @@ public class MiseEnPlaceView extends Application {
                     boolean estLoup = ((grille.getElement(x,y)) instanceof Loup);
                     boolean estMouton = ((grille.getElement(x,y)) instanceof Mouton);
                     boolean estSortie = ((grille.getElement(x,y)) instanceof Sortie);
+
                         if (modePlacement == null) return;
 
                     if ("mouton".equals(modePlacement) && !moutonPlace) {
@@ -143,6 +148,7 @@ public class MiseEnPlaceView extends Application {
                             cell.getChildren().add(mouton);
                             moutonPlace = true;
                             modePlacement = null;
+                            this.existMouton = true;
                         }
                     } else if ("loup".equals(modePlacement) && !loupPlace) {
                         boolean estBordure = (x == 0 || y == 0 || x == nbColonnes - 1 || y == nbLignes - 1);
@@ -159,6 +165,7 @@ public class MiseEnPlaceView extends Application {
                             cell.getChildren().add(loup);
                             loupPlace = true;
                             modePlacement = null;
+                            this.existLoup = true;
                         }
                     } else if ("marguerite".equals(modePlacement)) {
                         boolean estBordure = (x == 0 || y == 0 || x == nbColonnes - 1 || y == nbLignes - 1);
@@ -192,7 +199,7 @@ public class MiseEnPlaceView extends Application {
                         }
                         else if (!estRocher) {
                             cell.getChildren().clear();
-                            grille.remplacer(x,y,new Mouton(x,y));
+                            grille.remplacer(x,y,new Cactus(x,y));
                             ImageView cactus = new ImageView(imgCactus);
                             cactus.setFitWidth(TAILLE_CASE);
                             cactus.setFitHeight(TAILLE_CASE);
@@ -224,7 +231,7 @@ public class MiseEnPlaceView extends Application {
                             rocher.setFitHeight(TAILLE_CASE);
                             cell.getChildren().clear();
                             cell.getChildren().add(rocher);
-                            existSortie = false;
+                            this.existSortie = false;
                         }
                         else if (estBordure) {
                             afficherMessage("Pas la bordure!", messageBox);
@@ -239,9 +246,11 @@ public class MiseEnPlaceView extends Application {
 
                                 if (element instanceof Mouton) {
                                     moutonPlace = false;
+                                    existMouton = false;
                                 }
                                 if (element instanceof Loup) {
                                     loupPlace = false;
+                                    existLoup = false;
                                 }
                         }
                     } else if ("sortie".equals(modePlacement)) {
@@ -296,6 +305,42 @@ public class MiseEnPlaceView extends Application {
             -fx-background-radius: 15px;
             -fx-cursor: hand;
         """);
+        demarrerbouton.setOnMouseClicked(e -> {
+            if (grille.estConnexe() && existSortie && existMouton && existLoup) {
+                JeuView jeu = new JeuView();
+                jeu.setGrille(grille);
+                jeu.start(new Stage());
+                estConnexe = true;
+                primaryStage.close();
+            } else {
+                if (!existLoup){
+                    Alert alert = new Alert(Alert.AlertType.WARNING);
+                    alert.setTitle("Connexion invalide");
+                    alert.setHeaderText(null);
+                    alert.setContentText("Il manque un Loup !");
+                    alert.showAndWait();
+                }else if(!existMouton) {
+                    Alert alert = new Alert(Alert.AlertType.WARNING);
+                    alert.setTitle("Connexion invalide");
+                    alert.setHeaderText(null);
+                    alert.setContentText("Il manque un Mouton !");
+                    alert.showAndWait();
+                } else if (!grille.estConnexe()){
+                    Alert alert = new Alert(Alert.AlertType.WARNING);
+                    alert.setTitle("Connexion invalide");
+                    alert.setHeaderText(null);
+                    alert.setContentText("La grille n'est pas connexe !");
+                    alert.showAndWait();
+                } else if (!existSortie){
+                    Alert alert = new Alert(Alert.AlertType.WARNING);
+                    alert.setTitle("Connexion invalide");
+                    alert.setHeaderText(null);
+                    alert.setContentText("Il manque une Sortie !");
+                    alert.showAndWait();
+                }
+            }
+
+        });
 
 
 
