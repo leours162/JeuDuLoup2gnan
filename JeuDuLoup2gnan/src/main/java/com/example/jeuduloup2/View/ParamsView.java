@@ -43,37 +43,31 @@ public class ParamsView extends Application {
     public void start(Stage stage) {
 
 
-        // Fond
         Image fond = new Image(getClass().getResourceAsStream("/com/example/jeuduloup2/fond.png"));
         ImageView background = new ImageView(fond);
         background.setFitWidth(1920);
         background.setFitHeight(1080);
 
-        // Titre
         Text titre = new Text("Options");
         Font fontTitre = Font.loadFont(getClass().getResourceAsStream("/fonts/Unkempt-Bold.ttf"), 100);
         titre.setFont(fontTitre);
         titre.setStyle("-fx-fill: white;");
 
-        // Logo
         Image logo = new Image(getClass().getResourceAsStream("/com/example/jeuduloup2/logo.png"));
         ImageView logoView = new ImageView(logo);
         logoView.setFitWidth(150);
         logoView.setFitHeight(150);
 
-        // Bouton Retour
         Image imgRetour = new Image(getClass().getResourceAsStream("/com/example/jeuduloup2/retour.png"));
         StackPane boutonRetour = creerBoutonImage(imgRetour, () -> {
             new MenuView().start(new Stage());
             stage.close();
         });
 
-        // Barre du haut
         HBox barreHaut = new HBox(250, boutonRetour, titre, logoView);
         barreHaut.setAlignment(Pos.CENTER);
         barreHaut.setPadding(new Insets(20));
 
-        // Audio
         Text titreAudio = new Text("Audio");
         titreAudio.setStyle("-fx-fill: white; -fx-font-weight: bold; -fx-font-size: 40px;");
 
@@ -100,12 +94,12 @@ public class ParamsView extends Application {
         RadioButton Loup = new RadioButton("Loup");
         Loup.setToggleGroup(groupe);
         Loup.setStyle("-fx-font-size: 30px; -fx-text-fill: white;");
-        Loup.setOnMouseClicked(e -> JeuView.setAnimal(false));
+        Loup.setOnMouseClicked(e -> JeuView.setAnimal(true));
 
         RadioButton Mouton = new RadioButton("Mouton");
         Mouton.setToggleGroup(groupe);
         Mouton.setStyle("-fx-font-size: 30px; -fx-text-fill: white;");
-        Mouton.setOnMouseClicked(e -> JeuView.setAnimal(true));
+        Mouton.setOnMouseClicked(e -> JeuView.setAnimal(false));
 
         VBox blocSysteme = new VBox(10, Systeme, systeme, Loup, Mouton);
         blocSysteme.setStyle("-fx-background-color: rgba(255, 255, 255, 0.1); -fx-background-radius: 30px;");
@@ -119,7 +113,7 @@ public class ParamsView extends Application {
         centre.setAlignment(Pos.CENTER);
         centre.setSpacing(80);
 
-        // Layout principal
+
         BorderPane layout = new BorderPane();
         layout.setTop(barreHaut);
         layout.setCenter(centre);

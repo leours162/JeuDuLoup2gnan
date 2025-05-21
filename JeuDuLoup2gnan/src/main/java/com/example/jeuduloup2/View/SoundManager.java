@@ -16,10 +16,8 @@ public class SoundManager {
             mediaPlayer.setVolume(currentVolume);
             mediaPlayer.play();
         } else if (mediaPlayer.getStatus() != MediaPlayer.Status.PLAYING) {
-            // Si le son est arrêté ou en pause, on le reprend
             mediaPlayer.play();
         }
-        // Sinon, on ne fait rien, il joue déjà
     }
 
     public static void setVolume(double volume) {
@@ -31,9 +29,5 @@ public class SoundManager {
 
     public static double getVolume() {
         return currentVolume;
-    }
-
-    public static MediaPlayer getMediaPlayer() {
-        return mediaPlayer;
     }
 }

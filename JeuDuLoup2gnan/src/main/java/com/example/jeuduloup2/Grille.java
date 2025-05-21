@@ -31,19 +31,16 @@ public class Grille {
     }
 
     public void miseEnPlace() {
-        // Bordures haut et bas
         for (int x = 0; x < nbColonnes; x++) {
             elements[x][0] = new Rocher(x, 0);
             elements[x][nbLignes - 1] = new Rocher(x, nbLignes - 1);
         }
 
-        // Bordures gauche et droite
         for (int y = 1; y < nbLignes - 1; y++) {
             elements[0][y] = new Rocher(0, y);
             elements[nbColonnes - 1][y] = new Rocher(nbColonnes - 1, y);
         }
 
-        // Remplissage intérieur avec de l'herbe
         for (int y = 1; y < nbLignes - 1; y++) {
             for (int x = 1; x < nbColonnes - 1; x++) {
                 elements[x][y] = new Herbe(x, y);
@@ -76,7 +73,6 @@ public class Grille {
     public boolean estConnexe() {
         boolean[][] visite = new boolean[nbColonnes][nbLignes];
 
-        // Trouver une case accessible pour démarrer
         for (int y = 0; y < nbLignes; y++) {
             for (int x = 0; x < nbColonnes; x++) {
                 if (elements[x][y] != null && elements[x][y].isAccessible()) {
@@ -86,7 +82,6 @@ public class Grille {
             }
         }
 
-        // Aucune case accessible trouvée
         return false;
     }
 
@@ -118,16 +113,14 @@ public class Grille {
     public int[][] lesDeplacements(Animal e) {
         int v = e.getVitesse();
 
-        // Pour les moutons, nous devons nous assurer que seule la vitesse actuelle est utilisée
         if (e instanceof Mouton) {
             Mouton mouton = (Mouton) e;
-            v = mouton.getVitesse(); // S'assurer d'obtenir la vitesse à jour du mouton
+            v = mouton.getVitesse();
         }
 
         int x = e.getX();
         int y = e.getY();
 
-        // Déterminer le nombre maximal de déplacements possibles en fonction de la vitesse
         int maxDeplacements = 0;
         if (v >= 1) maxDeplacements += 4;     // 4 cases adjacentes
         if (v >= 2) maxDeplacements += 8;     // 8 cases supplémentaires à distance 2
@@ -137,7 +130,6 @@ public class Grille {
         int[][] res = new int[maxDeplacements][2];
         int index = 0;
 
-        // Ne générer que les déplacements correspondant à la vitesse actuelle
         if (v >= 1) {
             int[][] res1 = lesVoisins(x, y);
             for (int i = 0; i < 4; i++) {
@@ -174,7 +166,6 @@ public class Grille {
             }
         }
 
-        // Filtrer les coordonnées valides comme avant
         ArrayList<int[]> coordonneesValides = new ArrayList<>();
 
         for (int i = 0; i < maxDeplacements; i++) {
@@ -182,26 +173,21 @@ public class Grille {
             int targetX = coord[0];
             int targetY = coord[1];
 
-            // Vérifier que les coordonnées sont dans les limites et la case est accessible
             if (targetX >= 0 && targetX < nbColonnes && targetY >= 0 && targetY < nbLignes &&
                     elements[targetX][targetY].isAccessible()) {
 
-                // Pour les moutons, vérifier aussi si c'est une sortie
                 if (e instanceof Mouton && elements[targetX][targetY] instanceof Sortie) {
                     coordonneesValides.add(coord);
                 }
-                // Pour les loups, vérifier si c'est un mouton
                 else if (e instanceof Loup && elements[targetX][targetY] instanceof Mouton) {
                     coordonneesValides.add(coord);
                 }
-                // Sinon, vérifier s'il n'y a pas d'obstacle entre la position actuelle et la position cible
                 else if (elements[targetX][targetY].isAccessible() && cheminLibre(x, y, targetX, targetY)) {
                     coordonneesValides.add(coord);
                 }
             }
         }
 
-        // Convertir la liste filtrée en tableau 2D
         int[][] res2 = new int[coordonneesValides.size()][2];
         for (int i = 0; i < coordonneesValides.size(); i++) {
             res2[i] = coordonneesValides.get(i);
@@ -363,20 +349,17 @@ public class Grille {
         return true;}
 
     public boolean seDeplacer(Animal a, int x, int y) {
-        // Vérifier la distance du déplacement par rapport à la vitesse
         if (a instanceof Mouton) {
             Mouton mouton = (Mouton) a;
             int dx = Math.abs(x - a.getX());
             int dy = Math.abs(y - a.getY());
             int distance = dx + dy;  // Distance de Manhattan
 
-            // Si la distance est supérieure à la vitesse actuelle, le mouton ne peut pas se déplacer aussi loin
             if (distance > mouton.getVitesse()) {
                 return false;
             }
         }
 
-        // Utiliser la méthode existante pour vérifier si le déplacement est valide
         int[][] deplacements = lesDeplacements(a);
         boolean possible = false;
         for (int i = 0; i < deplacements.length; i++) {
