@@ -36,13 +36,13 @@ public class Mouton extends Animal {
         this.nbMarguerite = nbMarguerite;
     }
 
-    public void manger(int nutrition) {
-        this.setVitesse(nutrition);
-        if (nutrition == 1) {
+    public void manger(Vegetaux v) {
+        this.setVitesse(v.getNutrition());
+        if (v.getNutrition() == 1) {
             nbCactus++;
-        } else if (nutrition == 2) {
+        } else if (v.getNutrition() == 2) {
             nbHerbe++;
-        } else if (nutrition == 4) {
+        } else if (v.getNutrition() == 4) {
             nbMarguerite++;
         }
     }
