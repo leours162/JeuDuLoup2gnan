@@ -53,21 +53,21 @@ public class GrilleView extends Application {
         Text longLabel = new Text("Longueur");
         longLabel.setStyle("-fx-fill: white; -fx-font-weight: bold; -fx-font-size: 30px;");
         Spinner<Integer> spinnerLongueur = new Spinner<>();
-        spinnerLongueur.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(3, 20, 5));
+        spinnerLongueur.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(3, 12, 8));
 
         Text hautLabel = new Text("Hauteur");
         hautLabel.setStyle("-fx-fill: white; -fx-font-weight: bold; -fx-font-size: 30px;");
         Spinner<Integer> spinnerHauteur = new Spinner<>();
-        spinnerHauteur.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(3, 20, 5));
+        spinnerHauteur.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(3, 12, 8));
 
         Button valider = new Button("Valider");
         valider.setStyle("-fx-font-size: 25px; -fx-background-color: white; -fx-text-fill: black;");
         valider.setOnAction(e -> {
             int largeur = spinnerLongueur.getValue();
             int hauteur = spinnerHauteur.getValue();
-            JeuView jeu = new JeuView();
+            MiseEnPlaceView jeu = new MiseEnPlaceView();
             jeu.setgrille(largeur,hauteur);
-            new JeuView().start(new Stage());
+            jeu.start(new Stage());
             stage.close();
         });
 
