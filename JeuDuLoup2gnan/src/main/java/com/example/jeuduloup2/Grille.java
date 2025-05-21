@@ -1,5 +1,7 @@
 package com.example.jeuduloup2;
 
+import java.util.ArrayList;
+
 public class Grille {
     private Elements[][] elements;
     private int nbLignes;
@@ -123,126 +125,56 @@ public class Grille {
         int y= e.getY();
         int colonnes= this.getNbColonnes();
         int lignes= this.getNbLignes();
-        int[][] res = new int[v*(2+v*2)][2];
-        if (v==1){
-            res=lesVoisins(x,y);
-            return res;
-        }
-        else if (v==2){
-            res=lesVoisins(x,y);
-            int[][] res2= lesVoisins(x+1,y);
-            int[][] res3=lesVoisins(x,y+1);
-            int[][] res4=lesVoisins(x-1,y);
-            int[][] res5=lesVoisins(x,y-1);
-            for (int i=0;i<=2;i++){
-                for (int j=0;j<=2;j++){
-                    res[i+2][j]=res2[i][j];
-                    res[i+4][j]=res3[i][j];
-                    res[i+6][j]=res4[i][j];
-                    res[i+8][j]=res5[i][j];
+        int[][] res =new int[v*(2+v*2)][2];
+        if (v>=1){
+            int[][] res1 = lesVoisins(x,y);
+            for (int i=0; i<4; i++){
+                for (int j=0; j<2; j++){
+                    res[i][j] = res1[i][j];
                 }
             }
         }
-        else if (v==3){
-            res=lesVoisins(x,y);
-            int[][] res2= lesVoisins(x+1,y);
-            int[][] res3=lesVoisins(x,y+1);
-            int[][] res4=lesVoisins(x-1,y);
-            int[][] res5=lesVoisins(x,y-1);
-            for (int i=0;i<=2;i++){
-                for (int j=0;j<=2;j++){
-                    res[i+2][j]=res2[i][j];
-                    res[i+4][j]=res3[i][j];
-                    res[i+6][j]=res4[i][j];
-                    res[i+8][j]=res5[i][j];
-                }
-            }
-            int[][] res12= lesVoisins(x+2,y);
-            int[][] res13=lesVoisins(x,y+2);
-            int[][] res14=lesVoisins(x-1,y+1);
-            int[][] res15=lesVoisins(x-1,y-1);
-            int[][] res16=lesVoisins(x+1,y-1);
-            int[][] res17=lesVoisins(x+1,y+1);
-            int[][] res18=lesVoisins(x,y-2);
-            int[][] res19=lesVoisins(x,y+2);
-            for (int i=0;i<=2;i++){
-                for (int j=0;j<=2;j++){
-                    res[i+10][j]=res12[i][j];
-                    res[i+12][j]=res13[i][j];
-                    res[i+14][j]=res14[i][j];
-                    res[i+16][j]=res15[i][j];
-                    res[i+18][j]=res16[i][j];
-                    res[i+19][j]=res17[i][j];
-                    res[i+20][j]=res18[i][j];
-                    res[i+21][j]=res19[i][j];
+        if (v>=2){
+            int[][] res2 = lesVoisin2(x,y);
+            for (int i= 0; i <8; i++) {
+                for (int j= 0; j <2; j++) {
+                    res[i+4][j] = res2[i][j];
                 }
             }
         }
-        else if (v==4){
-            res=lesVoisins(x,y);
-            int[][] res2= lesVoisins(x+1,y);
-            int[][] res3=lesVoisins(x,y+1);
-            int[][] res4=lesVoisins(x-1,y);
-            int[][] res5=lesVoisins(x,y-1);
-            for (int i=0;i<=2;i++){
-                for (int j=0;j<=2;j++){
-                    res[i+2][j]=res2[i][j];
-                    res[i+4][j]=res3[i][j];
-                    res[i+6][j]=res4[i][j];
-                    res[i+8][j]=res5[i][j];
+        if (v>=3){
+            int[][] res3 = lesVoisin3(x,y);
+            for (int i= 0; i <12; i++) {
+                for (int j= 0; j <2; j++) {
+                    res[i+12][j] = res3[i][j];
                 }
             }
-            int[][] res12= lesVoisins(x+2,y);
-            int[][] res13=lesVoisins(x,y+2);
-            int[][] res14=lesVoisins(x-1,y+1);
-            int[][] res15=lesVoisins(x-1,y-1);
-            int[][] res16=lesVoisins(x+1,y-1);
-            int[][] res17=lesVoisins(x+1,y+1);
-            int[][] res18=lesVoisins(x,y-2);
-            int[][] res19=lesVoisins(x,y+2);
-            for (int i=0;i<=2;i++){
-                for (int j=0;j<=2;j++){
-                    res[i+10][j]=res12[i][j];
-                    res[i+12][j]=res13[i][j];
-                    res[i+14][j]=res14[i][j];
-                    res[i+16][j]=res15[i][j];
-                    res[i+18][j]=res16[i][j];
-                    res[i+20][j]=res17[i][j];
-                    res[i+22][j]=res18[i][j];
-                    res[i+24][j]=res19[i][j];
-                }
-            }
-            int[][] res22= lesVoisins(x+3,y);
-            int[][] res23=lesVoisins(x,y+3);
-            int[][] res24=lesVoisins(x-1,y+2);
-            int[][] res25=lesVoisins(x-1,y-2);
-            int[][] res26=lesVoisins(x+1,y-2);
-            int[][] res27=lesVoisins(x+1,y+2);
-            int[][] res28=lesVoisins(x+2,y-1);
-            int[][] res29=lesVoisins(x+2,y+1);
-            int[][] res30=lesVoisins(x-2,y-1);
-            int[][] res31=lesVoisins(x-2,y+1);
-            int[][] res32=lesVoisins(x,y+3);
-            int[][] res33=lesVoisins(x,y-3);
-            for (int i=0;i<=2;i++){
-                for (int j=0;j<=2;j++){
-                    res[i+26][j]=res22[i][j];
-                    res[i+28][j]=res23[i][j];
-                    res[i+30][j]=res24[i][j];
-                    res[i+32][j]=res25[i][j];
-                    res[i+34][j]=res26[i][j];
-                    res[i+36][j]=res27[i][j];
-                    res[i+38][j]=res28[i][j];
-                    res[i+40][j]=res29[i][j];
-                    res[i+42][j]=res30[i][j];
-                    res[i+44][j]=res31[i][j];
-                    res[i+46][j]=res32[i][j];
-                    res[i+48][j]=res33[i][j];
+        }
+        if (v>=4){
+            int[][] res4 = lesVoisin4(x,y);
+            for (int i= 0; i <16; i++) {
+                for (int j= 0; j <2; j++) {
+                    res[i+24][j] = res4[i][j];
                 }
             }
 
         }
-        return res;
+
+        ArrayList<int[]> a= new ArrayList<>();
+        ArrayList<int[]> b= new ArrayList<>();
+        for (int i= 0; i <v*(2+v*2); i++) {
+            a.add(res[i]);
+        }
+        for (int i= 0; i <v*(2+v*2); i++) {
+            if (elements[a.get(i)[0]][a.get(i)[1]].isAccessible() && (!(a.get(i)[0]>=nbColonnes || a.get(i)[1] >= nbLignes || a.get(i)[0] < 0 || a.get(i)[1] < 0))){
+                b.add(a.get(i));;
+            }
+        }
+        int[][] res2= new int[b.size()][2];
+        for (int i= 0; i <b.size(); i++) {
+            res2[i]=b.get(i);
+        }
+        return res2;
 
     }
     public int[][] lesVoisins(int x, int y) {
@@ -250,10 +182,114 @@ public class Grille {
         res[0][0] = x;
         res[0][1] = y+1;
         res[1][0] = x+1;
-        res[1][1] = y-1;
+        res[1][1] = y;
+        res[2][0] = x-1;
+        res[2][1] = y;
+        res[3][0] = x;
+        res[3][1] = y-1;
+        return res;
+    }
+    public int[][] lesVoisin2(int x, int y) {
+        int[][] res = new int[8][2];
+        res[0][0] = x;
+        res[0][1] = y+2;
+        res[1][0] = x;
+        res[1][1] = y-2;
+        res[2][0] = x+2;
+        res[2][1] = y;
+        res[3][0] = x-2;
+        res[3][1] = y;
+        res[4][0] = x-1;
+        res[4][1] = y-1;
+        res[5][0] = x-1;
+        res[5][1] = y+1;
+        res[6][0] = x+1;
+        res[6][1] = y+1;
+        res[7][0] = x+1;
+        res[7][1] = y-1;
+        return res;
+    }
+    public int[][] lesVoisin3(int x, int y) {
+        int[][] res = new int[12][2];
+        res[0][0] = x;
+        res[0][1] = y+3;
+        res[1][0] = x+1;
+        res[1][1] = y+2;
+        res[2][0] = x-1;
+        res[2][1] = y+2;
+        res[3][0] = x+1;
+        res[3][1] = y-2;
+        res[4][0] = x-1;
+        res[4][1] = y-2;
+        res[5][0] = x+2;
+        res[5][1] = y+1;
+        res[6][0] = x-2;
+        res[6][1] = y+1;
+        res[7][0] = x-2;
+        res[7][1] = y-1;
+        res[8][0] = x+2;
+        res[8][1] = y-1;
+        res[9][0] = x-3;
+        res[9][1] = y;
+        res[10][0] = x+3;
+        res[10][1] = y;
+        res[11][0] = x;
+        res[11][1] = y-3;
+        return res;
+    }
+    public int[][] lesVoisin4(int x, int y) {
+        int[][] res = new int[16][2];
+        res[0][0] = x;
+        res[0][1] = y+4;
+
+        res[1][0] = x;
+        res[1][1] = y-4;
+
+        res[2][0] = x+1;
+        res[2][1] = y-3;
+
+        res[3][0] = x+1;
+        res[3][1] = y+3;
+
+        res[4][0] = x-1;
+        res[4][1] = y+3;
+
+        res[5][0] = x-1;
+        res[5][1] = y-3;
+
+        res[6][0] = x+2;
+        res[6][1] = y+2;
+
+        res[7][0] = x+2;
+        res[7][1] = y-2;
+
+        res[8][0] = x-2;
+        res[8][1] = y-2;
+
+        res[9][0] = x-2;
+        res[9][1] = y+2;
+
+        res[10][0] = x+3;
+        res[10][1] = y+1;
+
+        res[11][0] = x+3;
+        res[11][1] = y-1;
+
+        res[12][0] = x-3;
+        res[12][1] = y-1;
+
+        res[13][0] = x-3;
+        res[13][1] = y+1;
+
+        res[14][0] = x+4;
+        res[14][1] = y;
+
+        res[15][0] = x-4;
+        res[15][1] = y;
         return res;
     }
 }
+
 
 
 
