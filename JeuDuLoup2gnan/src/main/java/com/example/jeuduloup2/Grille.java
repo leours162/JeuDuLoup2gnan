@@ -162,7 +162,7 @@ public class Grille {
             a.add(res[i]);
         }
         for (int i= 0; i <v*(2+v*2); i++) {
-            if (elements[a.get(i)[0]][a.get(i)[1]].isAccessible() && (!(a.get(i)[0]>=nbColonnes || a.get(i)[1] >= nbLignes || a.get(i)[0] < 0 || a.get(i)[1] < 0))){
+            if ((!(a.get(i)[0]>=nbColonnes || a.get(i)[1] >= nbLignes || a.get(i)[0] < 0 || a.get(i)[1] < 0)) && (elements[a.get(i)[0]][a.get(i)[1]].isAccessible() )){
                 b.add(a.get(i));;
             }
         }
