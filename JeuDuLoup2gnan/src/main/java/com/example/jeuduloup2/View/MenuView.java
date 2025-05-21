@@ -81,10 +81,6 @@ public class MenuView extends Application {
         primaryStage.setScene(scene);
         primaryStage.setResizable(false);
         primaryStage.show();
-        primaryStage.setTitle("Jeu du loup");
-        primaryStage.setScene(scene);
-        primaryStage.setResizable(false);
-        primaryStage.show();
     }
     public static void main(String[] args) {
         launch(args);

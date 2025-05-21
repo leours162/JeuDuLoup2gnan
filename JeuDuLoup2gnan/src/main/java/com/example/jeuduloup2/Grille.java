@@ -116,47 +116,68 @@ public class Grille {
         elements[x][y] = e;
     }
     public int[][] lesDeplacements(Animal e) {
-        int v= e.getVitesse();
-        int x= e.getX();
-        int y= e.getY();
-        int[][] res =new int[v*(2+v*2)][2];
-        if (v>=1){
-            int[][] res1 = lesVoisins(x,y);
-            for (int i=0; i<4; i++){
-                for (int j=0; j<2; j++){
-                    res[i][j] = res1[i][j];
-                }
-            }
-        }
-        if (v>=2){
-            int[][] res2 = lesVoisin2(x,y);
-            for (int i= 0; i <8; i++) {
-                for (int j= 0; j <2; j++) {
-                    res[i+4][j] = res2[i][j];
-                }
-            }
-        }
-        if (v>=3){
-            int[][] res3 = lesVoisin3(x,y);
-            for (int i= 0; i <12; i++) {
-                for (int j= 0; j <2; j++) {
-                    res[i+12][j] = res3[i][j];
-                }
-            }
-        }
-        if (v>=4){
-            int[][] res4 = lesVoisin4(x,y);
-            for (int i= 0; i <16; i++) {
-                for (int j= 0; j <2; j++) {
-                    res[i+24][j] = res4[i][j];
-                }
-            }
+        int v = e.getVitesse();
 
+        // Pour les moutons, nous devons nous assurer que seule la vitesse actuelle est utilisée
+        if (e instanceof Mouton) {
+            Mouton mouton = (Mouton) e;
+            v = mouton.getVitesse(); // S'assurer d'obtenir la vitesse à jour du mouton
         }
 
+        int x = e.getX();
+        int y = e.getY();
+
+        // Déterminer le nombre maximal de déplacements possibles en fonction de la vitesse
+        int maxDeplacements = 0;
+        if (v >= 1) maxDeplacements += 4;     // 4 cases adjacentes
+        if (v >= 2) maxDeplacements += 8;     // 8 cases supplémentaires à distance 2
+        if (v >= 3) maxDeplacements += 12;    // 12 cases supplémentaires à distance 3
+        if (v >= 4) maxDeplacements += 16;    // 16 cases supplémentaires à distance 4
+
+        int[][] res = new int[maxDeplacements][2];
+        int index = 0;
+
+        // Ne générer que les déplacements correspondant à la vitesse actuelle
+        if (v >= 1) {
+            int[][] res1 = lesVoisins(x, y);
+            for (int i = 0; i < 4; i++) {
+                res[index][0] = res1[i][0];
+                res[index][1] = res1[i][1];
+                index++;
+            }
+        }
+
+        if (v >= 2) {
+            int[][] res2 = lesVoisin2(x, y);
+            for (int i = 0; i < 8; i++) {
+                res[index][0] = res2[i][0];
+                res[index][1] = res2[i][1];
+                index++;
+            }
+        }
+
+        if (v >= 3) {
+            int[][] res3 = lesVoisin3(x, y);
+            for (int i = 0; i < 12; i++) {
+                res[index][0] = res3[i][0];
+                res[index][1] = res3[i][1];
+                index++;
+            }
+        }
+
+        if (v >= 4) {
+            int[][] res4 = lesVoisin4(x, y);
+            for (int i = 0; i < 16; i++) {
+                res[index][0] = res4[i][0];
+                res[index][1] = res4[i][1];
+                index++;
+            }
+        }
+
+        // Filtrer les coordonnées valides comme avant
         ArrayList<int[]> coordonneesValides = new ArrayList<>();
 
-        for (int i = 0; i < v * (2 + v * 2); i++) {
+        for (int i = 0; i < maxDeplacements; i++) {
             int[] coord = res[i];
             int targetX = coord[0];
             int targetY = coord[1];
@@ -165,8 +186,16 @@ public class Grille {
             if (targetX >= 0 && targetX < nbColonnes && targetY >= 0 && targetY < nbLignes &&
                     elements[targetX][targetY].isAccessible()) {
 
-                // Vérifier s'il n'y a pas d'obstacle entre la position actuelle et la position cible
-                if (cheminLibre(x, y, targetX, targetY)) {
+                // Pour les moutons, vérifier aussi si c'est une sortie
+                if (e instanceof Mouton && elements[targetX][targetY] instanceof Sortie) {
+                    coordonneesValides.add(coord);
+                }
+                // Pour les loups, vérifier si c'est un mouton
+                else if (e instanceof Loup && elements[targetX][targetY] instanceof Mouton) {
+                    coordonneesValides.add(coord);
+                }
+                // Sinon, vérifier s'il n'y a pas d'obstacle entre la position actuelle et la position cible
+                else if (elements[targetX][targetY].isAccessible() && cheminLibre(x, y, targetX, targetY)) {
                     coordonneesValides.add(coord);
                 }
             }
@@ -178,7 +207,6 @@ public class Grille {
             res2[i] = coordonneesValides.get(i);
         }
         return res2;
-
     }
     public int[][] lesVoisins(int x, int y) {
         int[][] res = new int[4][2];
@@ -334,16 +362,32 @@ public class Grille {
 
         return true;}
 
-    public boolean seDeplacer(Animal a,int x, int y) {
-        int[][] deplacements= lesDeplacements(a);
-        boolean possible = false;
-        for (int i=0; i<deplacements.length; i++) {
-            if (deplacements[i][0] == x && deplacements[i][1] == y) {
-                possible = true;
+    public boolean seDeplacer(Animal a, int x, int y) {
+        // Vérifier la distance du déplacement par rapport à la vitesse
+        if (a instanceof Mouton) {
+            Mouton mouton = (Mouton) a;
+            int dx = Math.abs(x - a.getX());
+            int dy = Math.abs(y - a.getY());
+            int distance = dx + dy;  // Distance de Manhattan
+
+            // Si la distance est supérieure à la vitesse actuelle, le mouton ne peut pas se déplacer aussi loin
+            if (distance > mouton.getVitesse()) {
+                return false;
             }
         }
+
+        // Utiliser la méthode existante pour vérifier si le déplacement est valide
+        int[][] deplacements = lesDeplacements(a);
+        boolean possible = false;
+        for (int i = 0; i < deplacements.length; i++) {
+            if (deplacements[i][0] == x && deplacements[i][1] == y) {
+                possible = true;
+                break;
+            }
+        }
+
         if (possible) {
-            a.bouger(x,y);
+            a.bouger(x, y);
         }
         return possible;
     }
