@@ -5,7 +5,7 @@ import javafx.scene.media.MediaPlayer;
 
 public class SoundManager {
     private static MediaPlayer mediaPlayer;
-    private static double currentVolume = 0.5;
+    private static double currentVolume = 0.2;
 
     public static void initMusic() {
         if (mediaPlayer == null) {
