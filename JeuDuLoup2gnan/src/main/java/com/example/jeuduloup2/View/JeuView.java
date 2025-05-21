@@ -38,7 +38,6 @@ public class JeuView extends Application {
     public boolean perdu = false;
     public static boolean animal = true;
 
-    // Variables pour le déplacement par clic
     private int animalSelectedX = -1;
     private int animalSelectedY = -1;
     private boolean animalSelected = false;
@@ -47,6 +46,8 @@ public class JeuView extends Application {
     private GridPane grid;
     private StackPane[][] cellules;
 
+    private Stage currentStage;
+
 
     public static void setGrille(Grille grille) {
         JeuView.grille = grille;
@@ -54,6 +55,7 @@ public class JeuView extends Application {
 
     @Override
     public void start(Stage primaryStage) {
+        this.currentStage = primaryStage;
         grid = new GridPane();
         cellules = new StackPane[grille.getNbColonnes()][grille.getNbLignes()];
 
@@ -256,6 +258,7 @@ public class JeuView extends Application {
                         alert.setHeaderText(null);
                         alert.setContentText("VICTOIREEEEE !");
                         alert.showAndWait();
+                        currentStage.close();
                         return;
                     }
 
@@ -268,6 +271,7 @@ public class JeuView extends Application {
                         alert.setHeaderText(null);
                         alert.setContentText("DEFAITE ...");
                         alert.showAndWait();
+                        currentStage.close();
                         return;
                     }
 
