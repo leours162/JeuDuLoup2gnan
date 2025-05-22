@@ -249,6 +249,19 @@ public class JeuView extends Application {
                 if (deplacementReussi) {
                     Elements destination = grille.getElement(x, y);
 
+                    if (!animal && destination instanceof Loup) {
+                        perdu = true;
+                        mettreAJourInterface(animalSelectedX, animalSelectedY, x, y, animalCourant);
+                        new MenuView().start(new Stage());
+                        Alert alert = new Alert(Alert.AlertType.WARNING);
+                        alert.setTitle("VOUS AVEZ PERDU");
+                        alert.setHeaderText(null);
+                        alert.setContentText("Le mouton a été mangé par le loup !");
+                        alert.showAndWait();
+                        currentStage.close();
+                        return;
+                    }
+
                     if (!animal && destination instanceof Sortie) {
                         gagne = true;
                         mettreAJourInterface(animalSelectedX, animalSelectedY, x, y, animalCourant);
@@ -398,7 +411,6 @@ public class JeuView extends Application {
         grille.remplacer(oldX, oldY, vegetal);
 
         newCell.getChildren().clear();
-
         newCell.getChildren().add(animalView);
 
         if (animal instanceof Loup) {
