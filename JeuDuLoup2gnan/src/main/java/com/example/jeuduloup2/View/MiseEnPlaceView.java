@@ -12,6 +12,8 @@ import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
+import java.io.IOException;
+
 public class MiseEnPlaceView extends Application {
     private final int TAILLE_CASE = 60;
     private String modePlacement = null;
@@ -309,7 +311,11 @@ public class MiseEnPlaceView extends Application {
             if (grille.estConnexe() && existSortie && existMouton && existLoup) {
                 JeuView jeu = new JeuView();
                 jeu.setGrille(grille);
-                jeu.start(new Stage());
+                try {
+                    jeu.start(new Stage());
+                } catch (IOException ex) {
+                    throw new RuntimeException(ex);
+                }
                 estConnexe = true;
                 primaryStage.close();
             } else {

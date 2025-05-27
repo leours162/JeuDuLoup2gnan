@@ -374,6 +374,14 @@ public class Grille {
         }
         return possible;
     }
+
+    public void setNbLignes(int nbLignes) {
+        this.nbLignes = nbLignes;
+    }
+
+    public void setNbColonnes(int nbColonnes) {
+        this.nbColonnes = nbColonnes;
+    }
 }
 
 
