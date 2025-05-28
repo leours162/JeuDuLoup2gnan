@@ -97,11 +97,11 @@ public class GrilleView extends Application {
                 try {
                     JeuView jeu = new JeuView();
                     jeu.setFichierGrille(fichier);
-                    jeu.setGrilleimportee(); // => va déclencher chargerGrilleDepuisFichier() dans start()
+                    jeu.setGrilleimportee();
                     jeu.start(new Stage());
                     stage.close();
                 } catch (IOException ex) {
-                    ex.printStackTrace(); // Affichage console si erreur
+                    ex.printStackTrace();
                 }
             }
         });

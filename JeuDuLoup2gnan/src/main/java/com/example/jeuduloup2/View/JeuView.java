@@ -60,7 +60,6 @@ public class JeuView extends Application {
 
     private Stage currentStage;
 
-    // Images pour éviter de les recharger
     private Image imgMarguerite, imgCactus, imgHerbe, imgRocher, imgMouton, imgLoup, imgSortie;
 
     public static void setGrille(Grille grille) {
@@ -72,76 +71,65 @@ public class JeuView extends Application {
         this.currentStage = primaryStage;
 
         if (grilleimportee && fichierGrille != null) {
-            System.out.println("Chargement de la grille importée depuis : " + fichierGrille.getAbsolutePath());
             chargerGrilleDepuisFichier();
         }
 
         if (grille == null) {
             throw new IllegalStateException("La grille n'est pas initialisée !");
         }
-        // Debug pour vérifier les dimensions
-        System.out.println("Dimensions de la grille: " + grille.getNbColonnes() + " colonnes x " + grille.getNbLignes() + " lignes");
 
-        // CALCUL ADAPTATIF DES TAILLES
         calculerTailleCellule();
 
-        // Charger toutes les images une seule fois
         chargerImages();
 
-        // Initialiser l'interface
         initialiserInterface();
 
-        // Initialiser les moutons
         initializeMoutons(grille);
 
-        // Créer la grille d'affichage
         creerGrilleAffichage();
 
-        // Créer l'interface complète
         Scene scene = creerScenePrincipale();
 
         primaryStage.setTitle("Jeu - Mange moi si tu peux");
         primaryStage.setScene(scene);
         primaryStage.show();
 
-        // Vérifier les conditions de fin
         verifierConditionsFinDeJeu();
     }
 
     private void chargerGrilleDepuisFichier() throws IOException {
         BufferedReader reader = new BufferedReader(new FileReader(fichierGrille));
         String line;
-        int maxLignes = 0;
+        java.util.List<String> lignes = new java.util.ArrayList<>();
         int maxColonnes = 0;
 
-        // Première passe : déterminer les dimensions
+        // Lire toutes les lignes d'abord
         while ((line = reader.readLine()) != null) {
-            maxLignes++;
+            lignes.add(line);
             maxColonnes = Math.max(maxColonnes, line.length());
         }
         reader.close();
 
-        // Créer la grille avec les bonnes dimensions
-        grille = new Grille(maxColonnes, maxLignes);
+        int maxLignes = lignes.size();
+        grille = new Grille(maxLignes, maxColonnes);
 
-        // Deuxième passe : remplir la grille
-        reader = new BufferedReader(new FileReader(fichierGrille));
-        int y = 0;
-
-        while ((line = reader.readLine()) != null && y < grille.getNbLignes()) {
-            if (line.length() > 0 && line.charAt(0) == '\uFEFF') {
-                line = line.substring(1); // supprime BOM s'il existe au début
-            }
-            System.out.println("Ligne " + y + " longueur = " + line.length() + " / attendu = " + grille.getNbColonnes());
-            for (int x = 0; x < grille.getNbColonnes(); x++) {
-                char c = x < line.length() ? line.charAt(x) : 'h';
+        // Traiter chaque ligne
+        for (int y = 0; y < maxLignes; y++) {
+            String ligneCourante = lignes.get(y);
+            for (int x = 0; x < maxColonnes; x++) {
+                char c;
+                if (x < ligneCourante.length()) {
+                    c = ligneCourante.charAt(x);
+                } else {
+                    // Au lieu de forcer 'h', vous pourriez vouloir ignorer ces cellules
+                    // ou utiliser un caractère par défaut différent
+                    c = 'h'; // ou continuez avec 'h' si c'est le comportement souhaité
+                }
 
                 Elements element = creerElementDepuisChar(c, x, y);
                 grille.remplacer(x, y, element);
             }
-            y++;
         }
-        reader.close();
     }
 
     private Elements creerElementDepuisChar(char c, int x, int y) {
@@ -161,18 +149,14 @@ public class JeuView extends Application {
         int nbColonnes = grille.getNbColonnes();
         int nbLignes = grille.getNbLignes();
 
-        // Espace disponible pour la grille (en laissant de la place pour les autres éléments)
-        double espaceDisponibleLargeur = 1920 - 600; // 600px pour les compteurs et logo
-        double espaceDisponibleHauteur = 1080 - 200;  // 200px pour les marges
+        double espaceDisponibleLargeur = 1920 - 600;
+        double espaceDisponibleHauteur = 1080 - 200;
 
-        // Calculer la taille optimale des cellules
         double tailleCelluleLargeur = espaceDisponibleLargeur / nbColonnes;
         double tailleCelluleHauteur = espaceDisponibleHauteur / nbLignes;
 
-        // Prendre la plus petite taille pour garder les cellules carrées
         tailleCellule = Math.min(tailleCelluleLargeur, tailleCelluleHauteur);
 
-        // Limites min/max pour la lisibilité
         tailleCellule = Math.max(30, Math.min(80, tailleCellule));
     }
 
@@ -187,7 +171,6 @@ public class JeuView extends Application {
     }
 
     private void initialiserInterface() {
-        // Adapter les tailles de police
         double facteurEchelle = tailleCellule / 60.0;
         double tailleTitre = Math.max(30, Math.min(60, 60 * facteurEchelle));
         double tailleTexte = Math.max(16, Math.min(24, 24 * facteurEchelle));
@@ -220,18 +203,13 @@ public class JeuView extends Application {
     private void creerGrilleAffichage() {
         grid = new GridPane();
         cellules = new StackPane[grille.getNbColonnes()][grille.getNbLignes()];
-        System.out.println("Ajout de la cellule : x=" + grille.getNbLignes() + ", y=" + grille.getNbColonnes());
 
-        System.out.println("Création du tableau cellules: " + grille.getNbColonnes() + "x" + grille.getNbLignes());
-
-        // Parcourir ligne par ligne, colonne par colonne
         for (int x = 0; x < grille.getNbColonnes(); x++) {
             for (int y = 0; y < grille.getNbLignes(); y++) {
                 StackPane cell = new StackPane();
                 cell.setPrefSize(tailleCellule, tailleCellule);
                 cellules[x][y] = cell;
 
-                // Créer les références finales pour les listeners
                 final int finalX = x;
                 final int finalY = y;
 
@@ -242,7 +220,6 @@ public class JeuView extends Application {
                     handleCellClick(finalX, finalY);
                 });
 
-                // Ajouter la cellule à la grille d'affichage (colonne, ligne)
                 grid.add(cell, x, y);
             }
         }
@@ -286,7 +263,6 @@ public class JeuView extends Application {
         tourPane.setAlignment(Pos.BOTTOM_RIGHT);
         tourPane.setPadding(new Insets(15 * facteurEchelle));
 
-        // Adapter la taille des icônes des compteurs
         double tailleIcone = Math.max(50, Math.min(100, 100 * facteurEchelle));
 
         ImageView imgMarg = new ImageView(imgMarguerite);
@@ -306,7 +282,6 @@ public class JeuView extends Application {
 
         VBox compteurs = new VBox(végétaux);
 
-        // Adapter la taille du logo
         double tailleLogo = Math.max(100, Math.min(200, 200 * facteurEchelle));
         Image logo = new Image(getClass().getResourceAsStream("/com/example/jeuduloup2/logo.png"));
         ImageView logoJeu = new ImageView(logo);
@@ -317,7 +292,6 @@ public class JeuView extends Application {
         logotour.setSpacing(20 * facteurEchelle);
         logotour.setAlignment(Pos.CENTER);
 
-        // Adapter l'espacement général
         HBox tout = new HBox(compteurs, grid, logotour);
         tout.setSpacing(Math.max(50, Math.min(150, 150 * facteurEchelle)));
         tout.setAlignment(Pos.CENTER);
@@ -362,7 +336,6 @@ public class JeuView extends Application {
                 }
             }
         }
-        System.out.println("Moutons initialisés: " + moutons.size());
     }
 
     private void updateMoutonPosition(int oldX, int oldY, int newX, int newY, Mouton mouton) {
@@ -377,7 +350,6 @@ public class JeuView extends Application {
             return;
         }
 
-        System.out.println("Clic sur cellule: (" + x + ", " + y + ")");
         Elements element = grille.getElement(x, y);
 
         if (!animalSelected) {
@@ -393,10 +365,36 @@ public class JeuView extends Application {
             Elements animalElement = grille.getElement(animalSelectedX, animalSelectedY);
             if (animalElement instanceof Animal) {
                 Animal animalCourant = (Animal) animalElement;
+                Elements destination = grille.getElement(x, y);
+
+                // CORRECTION: Traiter la nutrition AVANT le déplacement mais sans mettre à jour la position
+                if (animalCourant instanceof Mouton && destination instanceof Vegetaux) {
+                    Mouton mouton = (Mouton) animalCourant;
+                    Vegetaux vegetaux = (Vegetaux) destination;
+
+                    // Faire manger le mouton pour mettre à jour sa vitesse
+                    mouton.manger(vegetaux);
+
+                    // Mettre à jour les compteurs d'interface
+                    if (vegetaux.getNutrition() == 2) {
+                        herbeMangée++;
+                        cptHerbe.setText(String.valueOf(herbeMangée));
+                    } else if (vegetaux.getNutrition() == 4) {
+                        margueritéMangée++;
+                        cptMarguerite.setText(String.valueOf(margueritéMangée));
+                    } else if (vegetaux.getNutrition() == 1) {
+                        cactusMangé++;
+                        cptCactus.setText(String.valueOf(cactusMangé));
+                    }
+
+                    // Mettre à jour le label de vitesse immédiatement
+                    vitesseLabel.setText("Vitesse mouton: " + mouton.getVitesse());
+                }
+
                 boolean deplacementReussi = grille.seDeplacer(animalCourant, x, y);
 
                 if (deplacementReussi) {
-                    Elements destination = grille.getElement(x, y);
+                    destination = grille.getElement(x, y);
 
                     if (!animal && destination instanceof Loup) {
                         perdu = true;
@@ -421,8 +419,9 @@ public class JeuView extends Application {
 
                     mettreAJourInterface(animalSelectedX, animalSelectedY, x, y, animalCourant);
 
+                    // Mettre à jour la position du mouton dans la HashMap si c'est un mouton
                     if (animalCourant instanceof Mouton) {
-                        traiterMoutonMange((Mouton) animalCourant, destination, x, y);
+                        updateMoutonPosition(animalSelectedX, animalSelectedY, x, y, (Mouton) animalCourant);
                     }
 
                     incrementerTour();
@@ -438,26 +437,8 @@ public class JeuView extends Application {
         }
     }
 
-    private void traiterMoutonMange(Mouton mouton, Elements destination, int x, int y) {
-        if (destination instanceof Vegetaux) {
-            Vegetaux vegetaux = (Vegetaux) destination;
-            mouton.manger(vegetaux);
 
-            if (vegetaux.getNutrition() == 2) {
-                herbeMangée++;
-                cptHerbe.setText(String.valueOf(herbeMangée));
-            } else if (vegetaux.getNutrition() == 4) {
-                margueritéMangée++;
-                cptMarguerite.setText(String.valueOf(margueritéMangée));
-            } else if (vegetaux.getNutrition() == 1) {
-                cactusMangé++;
-                cptCactus.setText(String.valueOf(cactusMangé));
-            }
 
-            updateMoutonPosition(animalSelectedX, animalSelectedY, x, y, mouton);
-            vitesseLabel.setText("Vitesse mouton: " + mouton.getVitesse());
-        }
-    }
 
     private void afficherFinDeJeu(String titre, String message) {
         new MenuView().start(new Stage());
@@ -523,7 +504,6 @@ public class JeuView extends Application {
 
         oldCell.getChildren().clear();
 
-        // Générer un nouveau végétal aléatoire
         int rand = (int)(Math.random() * 3);
         Elements vegetal;
 
