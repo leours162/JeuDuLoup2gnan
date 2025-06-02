@@ -1,4 +1,10 @@
 package com.example.jeuduloup2;
+import java.util.PriorityQueue;
+import java.util.Comparator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Arrays;
+
 
 import java.util.ArrayList;
 
@@ -382,6 +388,75 @@ public class Grille {
     public void setNbColonnes(int nbColonnes) {
         this.nbColonnes = nbColonnes;
     }
+
+
+    public List<int[]> cheminLePlusCourt(int startX, int startY, int cibleX, int cibleY, Animal a) {
+        int[][] directions = { {0,1}, {1,0}, {0,-1}, {-1,0} };
+        int[][] dist = new int[nbColonnes][nbLignes];
+        int[][][] prev = new int[nbColonnes][nbLignes][2];
+
+        for (int i = 0; i < nbColonnes; i++) {
+            Arrays.fill(dist[i], Integer.MAX_VALUE);
+        }
+        dist[startX][startY] = 0;
+
+        PriorityQueue<int[]> pq = new PriorityQueue<>(Comparator.comparingInt(c -> c[2]));
+        pq.offer(new int[]{startX, startY, 0});
+
+        while (!pq.isEmpty()) {
+            int[] curr = pq.poll();
+            int x = curr[0], y = curr[1], d = curr[2];
+
+            if (x == cibleX && y == cibleY) break;
+
+            for (int[] dir : directions) {
+                int nx = x + dir[0];
+                int ny = y + dir[1];
+
+                if (nx < 0 || ny < 0 || nx >= nbColonnes || ny >= nbLignes)
+                    continue;
+
+                Elements elem = elements[nx][ny];
+                if (elem == null || !elem.isAccessible()) continue;
+                if (a instanceof Loup && elem instanceof Sortie) continue;
+
+                int cost = getCoutDeplacement(elem, a);
+                int newDist = d + cost;
+
+                if (newDist < dist[nx][ny]) {
+                    dist[nx][ny] = newDist;
+                    prev[nx][ny][0] = x;
+                    prev[nx][ny][1] = y;
+                    pq.offer(new int[]{nx, ny, newDist});
+                }
+            }
+        }
+
+        // Reconstruire le chemin
+        LinkedList<int[]> chemin = new LinkedList<>();
+        int x = cibleX, y = cibleY;
+        if (dist[x][y] == Integer.MAX_VALUE) return chemin;
+
+        while (x != startX || y != startY) {
+            chemin.addFirst(new int[]{x, y});
+            int px = prev[x][y][0];
+            int py = prev[x][y][1];
+            x = px;
+            y = py;
+        }
+        chemin.addFirst(new int[]{startX, startY});
+        return chemin;
+    }
+
+    private int getCoutDeplacement(Elements elem, Animal a) {
+        if (a instanceof Mouton) {
+            if (elem instanceof Marguerite) return 1;  // Bonus (peut être 0.5 si tu veux affiner)
+            if (elem instanceof Cactus) return 3;      // Malus
+            return 2; // Herbe ou Sortie
+        }
+        return 1; // Pour le loup, tout sauf Sortie
+    }
+
 }
 
 
