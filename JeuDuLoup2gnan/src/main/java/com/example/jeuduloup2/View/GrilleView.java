@@ -91,6 +91,7 @@ public class GrilleView extends Application {
                 } catch (IOException ex) {
                     throw new RuntimeException(ex);
                 }
+
                 stage.close();
             }
         });

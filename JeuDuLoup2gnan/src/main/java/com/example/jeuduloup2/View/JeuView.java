@@ -217,8 +217,8 @@ public class JeuView extends Application {
                 }
 
                 if (imageView != null) {
-                    imageView.setFitWidth(60);
-                    imageView.setFitHeight(60);
+                    imageView.setFitWidth(50);
+                    imageView.setFitHeight(50);
                     cell.getChildren().add(imageView);
                 }
 
@@ -303,13 +303,14 @@ public class JeuView extends Application {
                 animalSelectedY = y;
                 animalSelected = true;
 
-                messageLabel.setText("Sélectionnez une destination");
+                messageLabel.setText("Sélectionnez \n une destination");
+                messageLabel.setFont(Font.font("Arial", FontWeight.BOLD, 35));
 
                 afficherDeplacementsPossibles((Animal) element);
             } else {
                 String animalAttendu = animal ? "loup" : "mouton";
-                messageLabel.setText("Sélectionnez le " + animalAttendu + " (pas " + element.getClass().getSimpleName().toLowerCase() + ")");
-                messageLabel.setFont(Font.font("Arial", FontWeight.BOLD, 50));
+                messageLabel.setText("Sélectionnez le \n" + animalAttendu + " (pas " + element.getClass().getSimpleName().toLowerCase() + ")");
+                messageLabel.setFont(Font.font("Arial", FontWeight.BOLD, 35));
             }
         } else {
             Elements animalElement = grille.getElement(animalSelectedX, animalSelectedY);
@@ -386,12 +387,12 @@ public class JeuView extends Application {
                     }
 
                     animal = !animal;
-                    messageLabel.setText("Sélectionnez le " + (animal ? "loup" : "mouton"));
-                    messageLabel.setFont(Font.font("Arial", FontWeight.BOLD, 50));
+                    messageLabel.setText("Sélectionnez le \n" + (animal ? "loup" : "mouton"));
+                    messageLabel.setFont(Font.font("Arial", FontWeight.BOLD, 35));
 
                 } else {
-                    messageLabel.setText("Déplacement impossible ! Sélectionnez le " + (animal ? "loup" : "mouton"));
-                    messageLabel.setFont(Font.font("Arial", FontWeight.BOLD, 50));
+                    messageLabel.setText("Déplacement impossible ! Sélectionnez le \n" + (animal ? "loup" : "mouton"));
+                    messageLabel.setFont(Font.font("Arial", FontWeight.BOLD, 35));
                 }
 
                 animalSelected = false;
@@ -411,7 +412,7 @@ public class JeuView extends Application {
                 int x = deplacement[0];
                 int y = deplacement[1];
                 if (x >= 0 && x < grille.getNbColonnes() && y >= 0 && y < grille.getNbLignes()) {
-                    Rectangle highlight = new Rectangle(60, 60);
+                    Rectangle highlight = new Rectangle(50, 50);
                     if (animal instanceof Loup) {
                         highlight.setFill(Color.RED.deriveColor(0, 1, 1, 0.3));
                         Elements elementCible = grille.getElement(x, y);
