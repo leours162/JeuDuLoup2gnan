@@ -16,9 +16,16 @@ import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.HashMap;
 
 public class JeuView extends Application {
+    private boolean grilleimportee = false;
+    private File fichierGrille;
 
     private static Grille grille;
     private int tour = 1;
@@ -54,7 +61,67 @@ public class JeuView extends Application {
     }
 
     @Override
-    public void start(Stage primaryStage) {
+    public void start(Stage primaryStage) throws IOException {
+        if (grilleimportee) {
+            BufferedReader reader = new BufferedReader(new FileReader(fichierGrille));
+            String line;
+            java.util.List<String> lignes = new java.util.ArrayList<>();
+            int maxColonnes = 0;
+            while ((line = reader.readLine()) != null) {
+                lignes.add(line);
+                maxColonnes = Math.max(maxColonnes, line.length());
+            }
+            reader.close();
+            int maxLignes = lignes.size();
+            grille = new Grille(maxLignes, maxColonnes);
+
+            for (int y = 0; y < maxLignes; y++) {
+                for (int x = 0; x < maxColonnes; x++) {
+                    grille.remplacer(x, y, new Herbe(x, y));
+                }
+            }
+
+            for (int y = 0; y < maxLignes; y++) {
+                String ligneCourante = lignes.get(y);
+                for (int x = 0; x < maxColonnes; x++) {
+                    char c;
+                    if (x < ligneCourante.length()) {
+                        c = ligneCourante.charAt(x);
+                    } else {
+                        c = ' ';
+                    }
+
+                    switch (Character.toLowerCase(c)) {
+                        case 'm':
+                            grille.remplacer(x, y, new Mouton(x, y));
+                            break;
+                        case 'l':
+                            grille.remplacer(x, y, new Loup(x, y));
+                            break;
+                        case 'x':
+                            grille.remplacer(x, y, new Rocher(x, y));
+                            break;
+                        case 's':
+                            grille.remplacer(x, y, new Sortie(x, y));
+                            break;
+                        case 'f':
+                            grille.remplacer(x, y, new Marguerite(x, y));
+                            break;
+                        case 'c':
+                            grille.remplacer(x, y, new Cactus(x, y));
+                            break;
+                        case 'h':
+                            grille.remplacer(x, y, new Herbe(x, y));
+                            break;
+                        case ' ':
+                        case '.':
+                        default:
+                            break;
+                    }
+                }
+            }
+        }
+
         this.currentStage = primaryStage;
         grid = new GridPane();
         cellules = new StackPane[grille.getNbColonnes()][grille.getNbLignes()];
@@ -104,12 +171,12 @@ public class JeuView extends Application {
         ImageView imgCact = new ImageView(imgCactus);
         ImageView imgHerb = new ImageView(imgHerbe);
 
-        imgMarg.setFitWidth(100);
-        imgMarg.setFitHeight(100);
-        imgCact.setFitWidth(100);
-        imgCact.setFitHeight(100);
-        imgHerb.setFitWidth(100);
-        imgHerb.setFitHeight(100);
+        imgMarg.setFitWidth(50);
+        imgMarg.setFitHeight(50);
+        imgCact.setFitWidth(50);
+        imgCact.setFitHeight(50);
+        imgHerb.setFitWidth(50);
+        imgHerb.setFitHeight(50);
 
 
         HBox végétaux = new HBox(imgCact, cptCactus, imgMarg, cptMarguerite, imgHerb, cptHerbe);
@@ -121,7 +188,7 @@ public class JeuView extends Application {
         for (int i = 0; i < grille.getNbLignes(); i++) {
             for (int j = 0; j < grille.getNbColonnes(); j++) {
                 StackPane cell = new StackPane();
-                cell.setPrefSize(60, 60);
+                cell.setPrefSize(50, 50);
                 cellules[j][i] = cell;
 
                 final int x = j;
@@ -144,7 +211,7 @@ public class JeuView extends Application {
                     imageView = new ImageView(imgCactus);
                 } else if (e instanceof Sortie) {
                     imageView = new ImageView(imgSortie);
-                    Rectangle exitMarker = new Rectangle(60, 60);
+                    Rectangle exitMarker = new Rectangle(50, 50);
                     exitMarker.setFill(Color.GOLD.deriveColor(0, 1, 1, 0.3));
                     cell.getChildren().add(exitMarker);
                 }
@@ -165,15 +232,15 @@ public class JeuView extends Application {
 
         grid.setAlignment(Pos.CENTER);
         ImageView logoJeu = new ImageView(logo);
-        logoJeu.setFitHeight(200);
-        logoJeu.setFitWidth(200);
+        logoJeu.setFitHeight(150);
+        logoJeu.setFitWidth(150);
 
         VBox logotour = new VBox(logoJeu, tourPane, messageLabel, vitesseLabel);
         logotour.setSpacing(20);
         logotour.setAlignment(Pos.CENTER);
 
         HBox tout = new HBox(compteurs, grid, logotour);
-        tout.setSpacing(150);
+        tout.setSpacing(100);
 
         ImageView background = new ImageView(imgFondHerbe);
         background.setFitWidth(1920);
@@ -239,6 +306,10 @@ public class JeuView extends Application {
                 messageLabel.setText("Sélectionnez une destination");
 
                 afficherDeplacementsPossibles((Animal) element);
+            } else {
+                String animalAttendu = animal ? "loup" : "mouton";
+                messageLabel.setText("Sélectionnez le " + animalAttendu + " (pas " + element.getClass().getSimpleName().toLowerCase() + ")");
+                messageLabel.setFont(Font.font("Arial", FontWeight.BOLD, 50));
             }
         } else {
             Elements animalElement = grille.getElement(animalSelectedX, animalSelectedY);
@@ -314,9 +385,13 @@ public class JeuView extends Application {
                         }
                     }
 
-                    incrementerTour();
                     animal = !animal;
                     messageLabel.setText("Sélectionnez le " + (animal ? "loup" : "mouton"));
+                    messageLabel.setFont(Font.font("Arial", FontWeight.BOLD, 50));
+
+                } else {
+                    messageLabel.setText("Déplacement impossible ! Sélectionnez le " + (animal ? "loup" : "mouton"));
+                    messageLabel.setFont(Font.font("Arial", FontWeight.BOLD, 50));
                 }
 
                 animalSelected = false;
@@ -328,32 +403,32 @@ public class JeuView extends Application {
     }
 
     private void afficherDeplacementsPossibles(Animal animal) {
-        int[][] deplacements = grille.lesDeplacements(animal);
+            int[][] deplacements = grille.lesDeplacements(animal);
 
-        effacerDeplacementsPossibles();
+            effacerDeplacementsPossibles();
 
-        for (int[] deplacement : deplacements) {
-            int x = deplacement[0];
-            int y = deplacement[1];
-            if (x >= 0 && x < grille.getNbColonnes() && y >= 0 && y < grille.getNbLignes()) {
-                Rectangle highlight = new Rectangle(60, 60);
-                if (animal instanceof Loup) {
-                    highlight.setFill(Color.RED.deriveColor(0, 1, 1, 0.3));
-                    Elements elementCible = grille.getElement(x, y);
-                    if (elementCible instanceof Mouton) {
-                        highlight.setFill(Color.PURPLE.deriveColor(0, 1, 1, 0.5));
+            for (int[] deplacement : deplacements) {
+                int x = deplacement[0];
+                int y = deplacement[1];
+                if (x >= 0 && x < grille.getNbColonnes() && y >= 0 && y < grille.getNbLignes()) {
+                    Rectangle highlight = new Rectangle(60, 60);
+                    if (animal instanceof Loup) {
+                        highlight.setFill(Color.RED.deriveColor(0, 1, 1, 0.3));
+                        Elements elementCible = grille.getElement(x, y);
+                        if (elementCible instanceof Mouton) {
+                            highlight.setFill(Color.PURPLE.deriveColor(0, 1, 1, 0.5));
+                        }
+                    } else {
+                        highlight.setFill(Color.GREEN.deriveColor(0, 1, 1, 0.3));
+                        Elements elementCible = grille.getElement(x, y);
+                        if (elementCible instanceof Sortie) {
+                            highlight.setFill(Color.GOLD.deriveColor(0, 1, 1, 0.5));
+                        }
                     }
-                } else {
-                    highlight.setFill(Color.GREEN.deriveColor(0, 1, 1, 0.3));
-                    Elements elementCible = grille.getElement(x, y);
-                    if (elementCible instanceof Sortie) {
-                        highlight.setFill(Color.GOLD.deriveColor(0, 1, 1, 0.5));
-                    }
+
+                    cellules[x][y].getChildren().add(highlight);
                 }
-
-                cellules[x][y].getChildren().add(highlight);
             }
-        }
     }
 
     private void effacerDeplacementsPossibles() {
@@ -373,8 +448,8 @@ public class JeuView extends Application {
         } else {
             animalView = new ImageView(new Image(getClass().getResourceAsStream("/com/example/jeuduloup2/mouton.png")));
         }
-        animalView.setFitWidth(60);
-        animalView.setFitHeight(60);
+        animalView.setFitWidth(50);
+        animalView.setFitHeight(50);
 
         StackPane oldCell = cellules[oldX][oldY];
         StackPane newCell = cellules[newX][newY];
@@ -403,8 +478,8 @@ public class JeuView extends Application {
 
         if (imageVegetal != null) {
             ImageView vegetalView = new ImageView(imageVegetal);
-            vegetalView.setFitWidth(60);
-            vegetalView.setFitHeight(60);
+            vegetalView.setFitWidth(50);
+            vegetalView.setFitHeight(50);
             oldCell.getChildren().add(vegetalView);
         }
 
@@ -429,6 +504,14 @@ public class JeuView extends Application {
     private void incrementerTour() {
         tour++;
         tourLabel.setText("Tour " + tour);
+    }
+
+    public void setGrilleimportee() {
+        this.grilleimportee = true;
+    }
+
+    public void setFichierGrille(File fichier) {
+        this.fichierGrille = fichier;
     }
 
     public static void main(String[] args) {

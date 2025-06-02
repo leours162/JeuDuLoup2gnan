@@ -174,7 +174,7 @@ public class Grille {
             int targetY = coord[1];
 
             if (targetX >= 0 && targetX < nbColonnes && targetY >= 0 && targetY < nbLignes &&
-                    elements[targetX][targetY].isAccessible()) {
+                    elements[targetX][targetY] != null && elements[targetX][targetY].isAccessible()) {
 
                 if (e instanceof Mouton && elements[targetX][targetY] instanceof Sortie) {
                     coordonneesValides.add(coord);

@@ -12,7 +12,11 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+
+import java.io.File;
+import java.io.IOException;
 
 public class GrilleView extends Application {
 
@@ -71,6 +75,26 @@ public class GrilleView extends Application {
             stage.close();
         });
 
+        Button importer = new Button("Importer");
+        importer.setStyle("-fx-font-size: 25px; -fx-background-color: white; -fx-text-fill: black;");
+        importer.setOnAction(e -> {
+            FileChooser fileChooser = new FileChooser();
+            fileChooser.setTitle("Importer une grille");
+            File fichier = fileChooser.showOpenDialog(stage);
+
+            if (fichier != null) {
+                    JeuView jeu = new JeuView();
+                    jeu.setFichierGrille(fichier);
+                    jeu.setGrilleimportee();
+                try {
+                    jeu.start(new Stage());
+                } catch (IOException ex) {
+                    throw new RuntimeException(ex);
+                }
+                stage.close();
+            }
+        });
+
         Image logo = new Image(getClass().getResourceAsStream("/com/example/jeuduloup2/logo.png"));
         ImageView logoView = new ImageView(logo);
         logoView.setFitWidth(150);
@@ -84,7 +108,7 @@ public class GrilleView extends Application {
         barreHaut.setAlignment(Pos.CENTER);
         barreHaut.setPadding(new Insets(20));
 
-        VBox centre = new VBox(20, longLabel, spinnerLongueur, hautLabel, spinnerHauteur, valider);
+        VBox centre = new VBox(20, longLabel, spinnerLongueur, hautLabel, spinnerHauteur, valider, importer);
         centre.setAlignment(Pos.CENTER);
 
         BorderPane layout = new BorderPane();
