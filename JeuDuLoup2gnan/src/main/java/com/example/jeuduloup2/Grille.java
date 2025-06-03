@@ -36,7 +36,9 @@ public class Grille {
         return nbColonnes;
     }
 
+    // Méthode servant a créer une grille basique remplie d'herbe et entourée de rochers
     public void miseEnPlace() {
+        // Creer le contour de rochers
         for (int x = 0; x < nbColonnes; x++) {
             elements[x][0] = new Rocher(x, 0);
             elements[x][nbLignes - 1] = new Rocher(x, nbLignes - 1);
@@ -46,39 +48,15 @@ public class Grille {
             elements[0][y] = new Rocher(0, y);
             elements[nbColonnes - 1][y] = new Rocher(nbColonnes - 1, y);
         }
-
+        // Remplie la grille d'herbe
         for (int y = 1; y < nbLignes - 1; y++) {
             for (int x = 1; x < nbColonnes - 1; x++) {
                 elements[x][y] = new Herbe(x, y);
             }
         }
     }
-
-    public void setSortie(int x, int y) {
-        elements[x][y] = new Sortie(x, y);
-    }
-
-    public boolean sortieValide() {
-        for (int x = 0; x < nbColonnes; x++) {
-            for (int y = 0; y < nbLignes; y++) {
-                if (elements[x][y] instanceof Sortie) {
-                    boolean surBord = (x == 0 || x == nbColonnes - 1 || y == 0 || y == nbLignes - 1);
-                    boolean enCoin = (x == 0 && y == 0) ||
-                            (x == 0 && y == nbLignes - 1) ||
-                            (x == nbColonnes - 1 && y == 0) ||
-                            (x == nbColonnes - 1 && y == nbLignes - 1);
-                    if (surBord && !enCoin) {
-                        return true;
-                    }
-                }
-            }
-        }
-        return false;
-    }
-
     public boolean estConnexe() {
         boolean[][] visite = new boolean[nbColonnes][nbLignes];
-
         for (int y = 0; y < nbLignes; y++) {
             for (int x = 0; x < nbColonnes; x++) {
                 if (elements[x][y] != null && elements[x][y].isAccessible()) {
@@ -87,7 +65,6 @@ public class Grille {
                 }
             }
         }
-
         return false;
     }
 
@@ -113,10 +90,14 @@ public class Grille {
         }
         return true;
     }
+    // Méthode our changer une element en un autre a l'aide de ses coordonées
     public void remplacer(int x, int y, Elements e) {
         elements[x][y] = e;
     }
+
+    //Créé la liste des déplacements possibles
     public int[][] lesDeplacements(Animal e) {
+        // recupère la vitesse de l'animal
         int v = e.getVitesse();
 
         if (e instanceof Mouton) {
