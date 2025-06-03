@@ -496,6 +496,7 @@ public class JeuView extends Application {
             grille.remplacer(newX, newY, mouton);
             updateMoutonPosition(oldX, oldY, newX, newY, mouton);
         }
+        incrementerTour();
     }
 
     public static void setAnimal(boolean b){
