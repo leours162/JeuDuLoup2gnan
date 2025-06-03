@@ -456,6 +456,115 @@ public class Grille {
         }
         return 1; // Pour le loup, tout sauf Sortie
     }
+    public int manhattan(int debx , int deby, int finx , int finy){
+        return Math.abs(debx-finx) + Math.abs(deby-finy);
+    }
+
+    public int[][] heuristic(int x , int y){
+        int[][] heuristic = new int[nbLignes][nbColonnes];
+        for (int i = 0; i < nbLignes; i++){
+            for (int j = 0; j < nbColonnes; j++){
+                heuristic[i][j] = manhattan(i, j, x, y);
+            }
+        }
+        return heuristic;}
+    public int[][] heuristique2(int x, int y) {
+        int rows = elements.length;
+        int cols = elements[0].length;
+
+        int[][] distances = new int[rows][cols];
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++) {
+                distances[i][j] = -1;
+            }
+        }
+
+
+        ArrayList<int[]> currentLevel = new ArrayList<>();
+
+        ArrayList<int[]> nextLevel = new ArrayList<>();
+
+
+        currentLevel.add(new int[]{x, y});
+        distances[x][y] = 0;
+
+        int[][] directions = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
+        int currentDistance = 0;
+
+        while (!currentLevel.isEmpty()) {
+
+            for (int i = 0; i < currentLevel.size(); i++) {
+                int[] current = currentLevel.get(i);
+                int currentX = current[0];
+                int currentY = current[1];
+                for (int[] dir : directions) {
+                    int newX = currentX + dir[0];
+                    int newY = currentY + dir[1];
+                    if (newX >= 0 && newX < rows &&
+                            newY >= 0 && newY < cols &&
+                            elements[newX][newY].isAccessible() &&
+                            distances[newX][newY] == -1) {
+
+                        distances[newX][newY] = currentDistance + 1;
+                        nextLevel.add(new int[]{newX, newY});
+                    }
+                }
+            }
+            currentLevel.clear();
+            currentLevel.addAll(nextLevel);
+            nextLevel.clear();
+            currentDistance++;
+        }
+
+        return distances;
+    }
+    public ArrayList<int[]> aEtoile(int depx, int depy, int finx, int finy) {
+        int[][] heuristic = heuristique2(depx, depy);
+        for (int i = 0; i < heuristic.length; i++){
+            for (int j = 0; j < heuristic[0].length; j++){
+                if (heuristic[i][j] == -1){
+                    heuristic[i][j]=999999999;
+                }
+            }
+        }
+        ArrayList<int[]> leChemin = new ArrayList<>();
+
+        int currentX = depx;
+        int currentY = depy;
+
+
+        leChemin.add(new int[]{currentX, currentY});
+
+
+        while (currentX != finx || currentY != finy) {
+            int bestX = currentX;
+            int bestY = currentY;
+            int bestHeuristic = Integer.MAX_VALUE;
+
+
+
+            int[][] directions = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
+
+
+            for (int[] dir : directions) {
+                int newX = currentX + dir[0];
+                int newY = currentY + dir[1];
+
+                if (newX >= 0 && newX < nbLignes && newY >= 0 && newY < nbColonnes) {
+
+                    if (heuristic[newX][newY] < bestHeuristic) {
+                        bestHeuristic = heuristic[newX][newY];
+                        bestX = newX;
+                        bestY = newY;
+                    }
+                }
+            }
+            currentX = bestX;
+            currentY = bestY;
+            leChemin.add(new int[]{currentX, currentY});
+        }
+        return leChemin;
+    }
 
 }
 
