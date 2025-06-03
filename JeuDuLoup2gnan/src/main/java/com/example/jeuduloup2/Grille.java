@@ -14,7 +14,7 @@ public class Grille {
     private int nbColonnes;
 
     public Grille(int nbLignes, int nbColonnes) {
-        this.nbLignes = nbLignes + 2; // Ajout des bordures
+        this.nbLignes = nbLignes + 2;
         this.nbColonnes = nbColonnes + 2;
         this.elements = new Elements[this.nbColonnes][this.nbLignes];
     }
@@ -359,7 +359,7 @@ public class Grille {
             Mouton mouton = (Mouton) a;
             int dx = Math.abs(x - a.getX());
             int dy = Math.abs(y - a.getY());
-            int distance = dx + dy;  // Distance de Manhattan
+            int distance = dx + dy;
 
             if (distance > mouton.getVitesse()) {
                 return false;
@@ -432,7 +432,6 @@ public class Grille {
             }
         }
 
-        // Reconstruire le chemin
         LinkedList<int[]> chemin = new LinkedList<>();
         int x = cibleX, y = cibleY;
         if (dist[x][y] == Integer.MAX_VALUE) return chemin;
@@ -450,11 +449,11 @@ public class Grille {
 
     private int getCoutDeplacement(Elements elem, Animal a) {
         if (a instanceof Mouton) {
-            if (elem instanceof Marguerite) return 1;  // Bonus (peut être 0.5 si tu veux affiner)
-            if (elem instanceof Cactus) return 3;      // Malus
-            return 2; // Herbe ou Sortie
+            if (elem instanceof Marguerite) return 1;
+            if (elem instanceof Cactus) return 3;
+            return 2;
         }
-        return 1; // Pour le loup, tout sauf Sortie
+        return 1;
     }
     public int manhattan(int debx , int deby, int finx , int finy){
         return Math.abs(debx-finx) + Math.abs(deby-finy);

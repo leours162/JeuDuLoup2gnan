@@ -6,7 +6,6 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -62,6 +61,7 @@ public class JeuView extends Application {
 
     @Override
     public void start(Stage primaryStage) throws IOException {
+        // Vérifie si la on a importé la grille ou pas
         if (grilleimportee) {
             BufferedReader reader = new BufferedReader(new FileReader(fichierGrille));
             String line;
@@ -74,13 +74,7 @@ public class JeuView extends Application {
             reader.close();
             int maxLignes = lignes.size();
             grille = new Grille(maxLignes, maxColonnes);
-
-            for (int y = 0; y < maxLignes; y++) {
-                for (int x = 0; x < maxColonnes; x++) {
-                    grille.remplacer(x, y, new Herbe(x, y));
-                }
-            }
-
+            // Lecture du fichier puis on créer la grille a partir de ca
             for (int y = 0; y < maxLignes; y++) {
                 String ligneCourante = lignes.get(y);
                 for (int x = 0; x < maxColonnes; x++) {
@@ -90,7 +84,7 @@ public class JeuView extends Application {
                     } else {
                         c = ' ';
                     }
-
+                    // Pour chaque lettre, on remplace par l'élément qui correspond dans la grille
                     switch (Character.toLowerCase(c)) {
                         case 'm':
                             grille.remplacer(x, y, new Mouton(x, y));
@@ -122,6 +116,7 @@ public class JeuView extends Application {
             }
         }
 
+        // Initialisation de tout l'affichage
         this.currentStage = primaryStage;
         grid = new GridPane();
         cellules = new StackPane[grille.getNbColonnes()][grille.getNbLignes()];
@@ -185,6 +180,7 @@ public class JeuView extends Application {
 
         VBox compteurs = new VBox(végétaux);
 
+        // Apres avoir créer la grille ou dans GrilleView ou l'avoir importée, on créer l'affichage de la grille
         for (int i = 0; i < grille.getNbLignes(); i++) {
             for (int j = 0; j < grille.getNbColonnes(); j++) {
                 StackPane cell = new StackPane();
@@ -253,6 +249,7 @@ public class JeuView extends Application {
         primaryStage.setScene(scene);
         primaryStage.show();
 
+        // On vérifie les conditions si on a gagné ou pas
         if (gagne){
             Alert alert = new Alert(Alert.AlertType.WARNING);
             alert.setTitle("VOUS AVEZ GAGNE");
@@ -271,6 +268,7 @@ public class JeuView extends Application {
         }
     }
 
+
     private void initializeMoutons(Grille grille) {
         for (int i = 0; i < grille.getNbLignes(); i++) {
             for (int j = 0; j < grille.getNbColonnes(); j++) {
@@ -284,12 +282,15 @@ public class JeuView extends Application {
         }
     }
 
+
     private void updateMoutonPosition(int oldX, int oldY, int newX, int newY, Mouton mouton) {
         int oldKey = oldX * 1000 + oldY;
         int newKey = newX * 1000 + newY;
         moutons.remove(oldKey);
         moutons.put(newKey, mouton);
     }
+
+    // On gere tout le jeu ici
     private void handleCellClick(int x, int y) {
         if (gagne || perdu) {
             return;
@@ -297,6 +298,7 @@ public class JeuView extends Application {
 
         Elements element = grille.getElement(x, y);
 
+        // Des qu'on selectionne un animal
         if (!animalSelected) {
             if ((animal && element instanceof Loup) || (!animal && element instanceof Mouton)) {
                 animalSelectedX = x;
@@ -306,6 +308,8 @@ public class JeuView extends Application {
                 messageLabel.setText("Sélectionnez \n une destination");
                 messageLabel.setFont(Font.font("Arial", FontWeight.BOLD, 35));
 
+
+                // On affiche en mettant en valeur tous les déplacements possible pour lui selon l'animal qu'on a selectionné
                 afficherDeplacementsPossibles((Animal) element);
             } else {
                 String animalAttendu = animal ? "loup" : "mouton";
@@ -318,9 +322,11 @@ public class JeuView extends Application {
                 Animal animalCourant = (Animal) animalElement;
                 boolean deplacementReussi = grille.seDeplacer(animalCourant, x, y);
 
+                // Des qu'on déplacé l'animal
                 if (deplacementReussi) {
                     Elements destination = grille.getElement(x, y);
 
+                    // On vérifie ou il va pour savoir si il a gagné, perdu ou ce qu'il a mangé
                     if (!animal && destination instanceof Loup) {
                         perdu = true;
                         mettreAJourInterface(animalSelectedX, animalSelectedY, x, y, animalCourant);
@@ -403,9 +409,10 @@ public class JeuView extends Application {
         }
     }
 
+    // Méthode qui permet de mettre en valeur les déplacements possible de l'animal en fonction de ce qu'il a mangé et de l'animal
     private void afficherDeplacementsPossibles(Animal animal) {
         int[][] deplacements = grille.lesDeplacements(animal);
-
+        // On commence par effacer tous les déplacements pour éviter les bugs et les superpositions
         effacerDeplacementsPossibles();
 
         for (int[] deplacement : deplacements) {
@@ -432,6 +439,7 @@ public class JeuView extends Application {
         }
     }
 
+    // Elle sert tout simplement a enlever la mise en valeur des cases ou l'animal pouvait se déplacer
     private void effacerDeplacementsPossibles() {
         for (int i = 0; i < grille.getNbColonnes(); i++) {
             for (int j = 0; j < grille.getNbLignes(); j++) {
@@ -442,6 +450,7 @@ public class JeuView extends Application {
         }
     }
 
+    // Cette fonction permet à chaque fois qu'on l'appelle de mettre à jour l'interface, a chaque déplacement cela met a jour la grille
     private void mettreAJourInterface(int oldX, int oldY, int newX, int newY, Animal animal) {
         ImageView animalView;
         if (animal instanceof Loup) {
@@ -503,6 +512,7 @@ public class JeuView extends Application {
         animal = b;
     }
 
+    // On incrémente a chaque déplacement les tours pour l'affichage
     private void incrementerTour() {
         tour++;
         tourLabel.setText("Tour " + tour);
