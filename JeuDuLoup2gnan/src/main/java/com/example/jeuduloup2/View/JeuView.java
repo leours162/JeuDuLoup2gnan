@@ -6,6 +6,8 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.Cell;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -20,11 +22,15 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 public class JeuView extends Application {
     private boolean grilleimportee = false;
     private File fichierGrille;
+
+    private boolean automatiser = false;
 
     private static Grille grille;
     private int tour = 1;
@@ -44,6 +50,11 @@ public class JeuView extends Application {
     public boolean perdu = false;
     public static boolean animal = true;
 
+    private int[] coLoup = new int[2];
+    private int[] coMouton = new int[2];
+    private int[] coSortie = new int[2];
+    private boolean fuite;
+
     private int animalSelectedX = -1;
     private int animalSelectedY = -1;
     private boolean animalSelected = false;
@@ -60,7 +71,7 @@ public class JeuView extends Application {
     }
 
     @Override
-    public void start(Stage primaryStage) throws IOException {
+    public void start(Stage primaryStage) throws IOException, InterruptedException {
         // Vérifie si la on a importé la grille ou pas
         if (grilleimportee) {
             BufferedReader reader = new BufferedReader(new FileReader(fichierGrille));
@@ -91,12 +102,16 @@ public class JeuView extends Application {
                             break;
                         case 'l':
                             grille.remplacer(x, y, new Loup(x, y));
+                            coLoup[0] = x;
+                            coLoup[1] = y;
                             break;
                         case 'x':
                             grille.remplacer(x, y, new Rocher(x, y));
                             break;
                         case 's':
                             grille.remplacer(x, y, new Sortie(x, y));
+                            coSortie[0] = x;
+                            coSortie[1] = y;
                             break;
                         case 'f':
                             grille.remplacer(x, y, new Marguerite(x, y));
@@ -173,6 +188,24 @@ public class JeuView extends Application {
         imgHerb.setFitWidth(50);
         imgHerb.setFitHeight(50);
 
+        Button Automatiser = new Button("Automatiser");
+        Automatiser.setStyle("-fx-font-size: 25px; -fx-background-color: white; -fx-text-fill: black;");
+        Automatiser.setOnAction(e -> {
+            System.out.println("Bouton Automatiser cliqué");
+            try {
+                if (animal) {
+                    Loup loup = (Loup) grille.getElement(coLoup[0], coLoup[1]);
+                    Sortie sortie = (Sortie) grille.getElement(coSortie[0], coSortie[1]);
+                    setAutomatiserDijkstra(loup, sortie);
+                } else {
+                    Mouton mouton = (Mouton) grille.getElement(coMouton[0], coMouton[1]);
+                    Sortie sortie = (Sortie) grille.getElement(coSortie[0], coSortie[1]);
+                    setAutomatiserDijkstra(mouton, sortie);
+                }
+            } catch (Exception ex) {
+                ex.printStackTrace(); // important
+            }
+        });
 
         HBox végétaux = new HBox(imgCact, cptCactus, imgMarg, cptMarguerite, imgHerb, cptHerbe);
         végétaux.setAlignment(Pos.CENTER);
@@ -217,7 +250,6 @@ public class JeuView extends Application {
                     imageView.setFitHeight(50);
                     cell.getChildren().add(imageView);
                 }
-
                 cell.setOnMouseClicked(event -> {
                     handleCellClick(x, y);
                 });
@@ -231,7 +263,7 @@ public class JeuView extends Application {
         logoJeu.setFitHeight(150);
         logoJeu.setFitWidth(150);
 
-        VBox logotour = new VBox(logoJeu, tourPane, messageLabel, vitesseLabel);
+        VBox logotour = new VBox(logoJeu, tourPane, messageLabel, vitesseLabel,Automatiser);
         logotour.setSpacing(20);
         logotour.setAlignment(Pos.CENTER);
 
@@ -508,6 +540,64 @@ public class JeuView extends Application {
         incrementerTour();
     }
 
+    public void setAutomatiserDijkstra (Animal animal, Sortie s) throws InterruptedException {
+       if (animal instanceof Mouton) {
+           List cell = grille.cheminLePlusCourt(animal.getX(),animal.getY(), s.getX(),s.getY(), animal);
+           System.out.println(cell);
+           for (int i = 0; i < cell.size(); i++) {
+               Rectangle highlight = new Rectangle(50, 50);
+               highlight.setFill(Color.GREEN.deriveColor(0, 1, 1, 0.5));
+               Thread.sleep(500);
+           }
+           if (cell.size() <= 1) return;
+           int[] deplacement = (int[]) cell.get(1);
+
+           handleCellClick(deplacement[0],deplacement[1]);
+           coMouton = (int[]) cell.get(animal.getVitesse());
+       }
+       else if (animal instanceof Loup) {
+           List cell = grille.cheminLePlusCourt(animal.getX(),animal.getY(), coMouton[0],coMouton[1], animal);
+           for (int i = 0; i < cell.size(); i++) {
+               Rectangle highlight = new Rectangle(50, 50);
+               highlight.setFill(Color.RED.deriveColor(0, 1, 1, 0.5));
+               Thread.sleep(500);
+           }
+           if (cell.size() <= 1) return;
+           int[] deplacement = (int[]) cell.get(1);
+
+           handleCellClick(deplacement[0],deplacement[1]);
+           coLoup = (int[]) cell.get(animal.getVitesse());
+       }
+    }
+
+    public void setAutomatiserAetoile (Animal animal, Sortie s) throws InterruptedException {
+        System.out.println("Entrée dans setAutomatiserAetoile");
+        if (animal instanceof Mouton) {
+            List cell = grille.aEtoile(animal.getX(),animal.getY(), s.getX(),s.getY());
+            System.out.println(cell);
+            for (int i = 0; i < cell.size(); i++) {
+                Rectangle highlight = new Rectangle(50, 50);
+                highlight.setFill(Color.GREEN.deriveColor(0, 1, 1, 0.5));
+                Thread.sleep(500);
+            }
+            int[] deplacement = (int[]) cell.get(animal.getVitesse());
+            handleCellClick(deplacement[0],deplacement[1]);
+            coMouton = (int[]) cell.get(animal.getVitesse());
+        }
+        else if (animal instanceof Loup) {
+            List cell = grille.aEtoile(animal.getX(),animal.getY(), coMouton[0],coMouton[1]);
+            System.out.println(cell);
+            for (int i = 0; i < cell.size(); i++) {
+                Rectangle highlight = new Rectangle(50, 50);
+                highlight.setFill(Color.RED.deriveColor(0, 1, 1, 0.5));
+                Thread.sleep(500);
+            }
+            int[] deplacement = (int[]) cell.get(animal.getVitesse());
+            handleCellClick(deplacement[0],deplacement[1]);
+            coLoup = (int[]) cell.get(animal.getVitesse());
+        }
+    }
+
     public static void setAnimal(boolean b){
         animal = b;
     }
@@ -524,6 +614,21 @@ public class JeuView extends Application {
 
     public void setFichierGrille(File fichier) {
         this.fichierGrille = fichier;
+    }
+
+    public void setCoMouton(int x, int y){
+        coMouton[0] = x;
+        coMouton[1] = y;
+    }
+
+    public void setCoLoup(int x, int y){
+        coLoup[0] = x;
+        coLoup[1] = y;
+    }
+
+    public void setCoSortie(int x, int y){
+        coSortie[0] = x;
+        coSortie[1] = y;
     }
 
     public static void main(String[] args) {

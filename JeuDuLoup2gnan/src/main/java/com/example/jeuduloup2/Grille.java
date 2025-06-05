@@ -373,7 +373,7 @@ public class Grille {
     }
 
 
-    public List<int[]> cheminLePlusCourt(int startX, int startY, int cibleX, int cibleY, Animal a) {
+    public List<int[]> cheminLePlusCourt( int startX, int startY, int cibleX, int cibleY, Animal a) {
         int[][] directions = { {0,1}, {1,0}, {0,-1}, {-1,0} };
         int[][] dist = new int[nbColonnes][nbLignes];
         int[][][] prev = new int[nbColonnes][nbLignes][2];
@@ -483,6 +483,7 @@ private int getCoutDeplacement(Elements e, Animal a) {
                     int newY = currentY + dir[1];
                     if (newX >= 0 && newX < rows &&
                             newY >= 0 && newY < cols &&
+                            elements[newX][newY] != null &&  // protection ajoutée ici
                             elements[newX][newY].isAccessible() &&
                             distances[newX][newY] == -1) {
 
