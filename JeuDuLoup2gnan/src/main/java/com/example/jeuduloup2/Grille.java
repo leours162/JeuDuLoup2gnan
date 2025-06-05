@@ -373,60 +373,80 @@ public class Grille {
     }
 
 
-    public List<int[]> cheminLePlusCourt( int startX, int startY, int cibleX, int cibleY, Animal a) {
-        int[][] directions = { {0,1}, {1,0}, {0,-1}, {-1,0} };
-        int[][] dist = new int[nbColonnes][nbLignes];
-        int[][][] prev = new int[nbColonnes][nbLignes][2];
+    public ArrayList<int[]> cheminLePlusCourt(int departX, int departY, int arriveeX, int arriveeY, Animal animal) {
+        int[][] distances = new int[nbColonnes][nbLignes];                     // Distance minimale depuis la case de départ
+        boolean[][] dejaVisite = new boolean[nbColonnes][nbLignes];           // Marque les cases déjà explorées
+        int[][][] precedent = new int[nbColonnes][nbLignes][2];               // Pour reconstituer le chemin final
+        int[][] directions = {{0, 1}, {1, 0}, {0, -1}, {-1, 0}};               // Déplacements possibles : haut, droite, bas, gauche
 
-        for (int i = 0; i < nbColonnes; i++) {
-            Arrays.fill(dist[i], Integer.MAX_VALUE);
+        // Initialisation : toutes les distances sont infinies sauf le point de départ
+        for (int x = 0; x < nbColonnes; x++) {
+            Arrays.fill(distances[x], Integer.MAX_VALUE);
         }
-        dist[startX][startY] = 0;
+        distances[departX][departY] = 0;
 
-        PriorityQueue<int[]> pq = new PriorityQueue<>(Comparator.comparingInt(c -> c[2]));
-        pq.offer(new int[]{startX, startY, 0});
+        // Algorithme de Dijkstra (version simple sans file de priorité)
+        while (true) {
+            int distMin = Integer.MAX_VALUE;
+            int caseX = -1, caseY = -1;
 
-        while (!pq.isEmpty()) {
-            int[] curr = pq.poll();
-            int x = curr[0], y = curr[1], d = curr[2];
+            // On cherche la case non encore visitée ayant la plus petite distance
+            for (int x = 0; x < nbColonnes; x++) {
+                for (int y = 0; y < nbLignes; y++) {
+                    if (!dejaVisite[x][y] && distances[x][y] < distMin) {
+                        distMin = distances[x][y];
+                        caseX = x;
+                        caseY = y;
+                    }
+                }
+            }
 
-            if (x == cibleX && y == cibleY) break;
+            // Si aucune case n'a été trouvée ou si on a atteint la cible, on sort de la boucle
+            if (caseX == -1 || (caseX == arriveeX && caseY == arriveeY)) break;
 
-            for (int[] dir : directions) {
-                int nx = x + dir[0];
-                int ny = y + dir[1];
+            dejaVisite[caseX][caseY] = true;
 
-                if (nx < 0 || ny < 0 || nx >= nbColonnes || ny >= nbLignes)
+            // Pour chaque direction, on regarde les voisins accessibles
+            for (int[] direction : directions) {
+                int voisinX = caseX + direction[0];
+                int voisinY = caseY + direction[1];
+
+                // Vérification des limites de la grille
+                if (voisinX < 0 || voisinY < 0 || voisinX >= nbColonnes || voisinY >= nbLignes)
                     continue;
 
-                Elements elem = elements[nx][ny];
-                if (elem == null || !elem.isAccessible()) continue;
-                if (a instanceof Loup && elem instanceof Sortie) continue;
+                Elements voisin = elements[voisinX][voisinY];
+                if (voisin == null || !voisin.isAccessible()) continue;
 
-                int cost = getCoutDeplacement(elem, a);
-                int newDist = d + cost;
+                // Le loup ne peut pas aller sur une case de sortie
+                if (animal instanceof Loup && voisin instanceof Sortie) continue;
 
-                if (newDist < dist[nx][ny]) {
-                    dist[nx][ny] = newDist;
-                    prev[nx][ny][0] = x;
-                    prev[nx][ny][1] = y;
-                    pq.offer(new int[]{nx, ny, newDist});
+                // Calcul du coût pour aller sur la case voisine
+                int cout = getCoutDeplacement(voisin, animal);
+                int nouvelleDistance = distances[caseX][caseY] + cout;
+
+                if (nouvelleDistance < distances[voisinX][voisinY]) {
+                    distances[voisinX][voisinY] = nouvelleDistance;
+                    precedent[voisinX][voisinY][0] = caseX;
+                    precedent[voisinX][voisinY][1] = caseY;
                 }
             }
         }
 
-        LinkedList<int[]> chemin = new LinkedList<>();
-        int x = cibleX, y = cibleY;
-        if (dist[x][y] == Integer.MAX_VALUE) return chemin;
+        // Reconstruction du chemin depuis la cible vers le départ
+        ArrayList<int[]> chemin = new ArrayList<>();
+        if (distances[arriveeX][arriveeY] == Integer.MAX_VALUE) return chemin; // Aucun chemin trouvé
 
-        while (x != startX || y != startY) {
-            chemin.addFirst(new int[]{x, y});
-            int px = prev[x][y][0];
-            int py = prev[x][y][1];
-            x = px;
-            y = py;
+        int x = arriveeX, y = arriveeY;
+        while (x != departX || y != departY) {
+            chemin.add(0, new int[]{x, y});
+            int precX = precedent[x][y][0];
+            int precY = precedent[x][y][1];
+            x = precX;
+            y = precY;
         }
-        chemin.addFirst(new int[]{startX, startY});
+        chemin.add(0, new int[]{departX, departY});
+
         return chemin;
     }
 
