@@ -431,7 +431,6 @@ public class Grille {
     }
 
 private int getCoutDeplacement(Elements e, Animal a) {
-    // On peut adapter selon le type d’élément
     if (e instanceof Herbe) return 1;
     if (e instanceof Sortie) return 1;
     if (e instanceof Rocher) return Integer.MAX_VALUE; // Devrait être inaccessible
@@ -504,7 +503,7 @@ private int getCoutDeplacement(Elements e, Animal a) {
         for (int i = 0; i < heuristic.length; i++){
             for (int j = 0; j < heuristic[0].length; j++){
                 if (heuristic[i][j] == -1){
-                    heuristic[i][j]=999999999;
+                    heuristic[i][j]=99;
                 }
             }
         }
