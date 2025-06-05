@@ -27,6 +27,10 @@ public class MiseEnPlaceView extends Application {
     public int nbLignes;
     private boolean estConnexe = false;
 
+    private int[] coMouton;
+    private int[] coSortie;
+    private int[] coLoup;
+
     private StackPane creerBoutonImage(Image image, Runnable action) {
         ImageView icone = new ImageView(image);
         icone.setFitWidth(140);
@@ -63,6 +67,10 @@ public class MiseEnPlaceView extends Application {
     public void start(Stage primaryStage) {
         Grille grille = new Grille(this.nbColonnes,nbLignes);
         grille.miseEnPlace();
+
+        coMouton = new int[2];
+        coLoup = new int[2];
+        coSortie = new int[2];
 
         StackPane container = new StackPane();
         container.setPrefSize(150, 500);
@@ -144,6 +152,8 @@ public class MiseEnPlaceView extends Application {
                         } else if (!estBordure) {
                             cell.getChildren().clear();
                             grille.remplacer(x,y,new Mouton(x,y));
+                            coMouton[0] = x;
+                            coMouton[1] = y;
                             ImageView mouton = new ImageView(imgMouton);
                             mouton.setFitWidth(TAILLE_CASE);
                             mouton.setFitHeight(TAILLE_CASE);
@@ -161,6 +171,8 @@ public class MiseEnPlaceView extends Application {
                         } else if (!estBordure) {
                             cell.getChildren().clear();
                             grille.remplacer(x,y,new Loup(x,y));
+                            coLoup[0] = x;
+                            coLoup[1] = y;
                             ImageView loup = new ImageView(imgLoup);
                             loup.setFitWidth(TAILLE_CASE);
                             loup.setFitHeight(TAILLE_CASE);
@@ -265,6 +277,8 @@ public class MiseEnPlaceView extends Application {
                                 afficherMessage("Pas les coins !", messageBox);
                             }else if (grille.getElement(x,y) instanceof Rocher) {
                                 grille.remplacer(x,y,new Sortie(x,y));
+                                coSortie[0] = x;
+                                coSortie[1] = y;
                                 cell.getChildren().clear();
                                 ImageView herbe = new ImageView(imgHerbe);
                                 herbe.setFitWidth(TAILLE_CASE);
@@ -311,9 +325,23 @@ public class MiseEnPlaceView extends Application {
             if (grille.estConnexe() && existSortie && existMouton && existLoup) {
                 JeuView jeu = new JeuView();
                 jeu.setGrille(grille);
+
+                // Vérifications supplémentaires :
+                if (coLoup != null && existLoup) {
+                    jeu.setCoLoup(coLoup[0], coLoup[1]);
+                }
+                if (coSortie != null && existSortie) {
+                    jeu.setCoSortie(coSortie[0], coSortie[1]);
+                }
+                if (coMouton != null && existMouton) {
+                    jeu.setCoMouton(coMouton[0], coMouton[1]);
+                }
+
                 try {
                     jeu.start(new Stage());
                 } catch (IOException ex) {
+                    throw new RuntimeException(ex);
+                } catch (InterruptedException ex) {
                     throw new RuntimeException(ex);
                 }
                 estConnexe = true;

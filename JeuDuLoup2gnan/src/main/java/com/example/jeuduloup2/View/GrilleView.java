@@ -102,6 +102,8 @@ public class GrilleView extends Application {
                     stage.close();
                 } catch (IOException ex) {
                     ex.printStackTrace();
+                } catch (InterruptedException ex) {
+                    throw new RuntimeException(ex);
                 }
             }
         });
