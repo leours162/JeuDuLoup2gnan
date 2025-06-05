@@ -160,8 +160,10 @@ public class Grille {
             int targetX = coord[0];
             int targetY = coord[1];
 
-            if (targetX >= 0 && targetX < nbColonnes && targetY >= 0 && targetY < nbLignes &&
-                    elements[targetX][targetY].isAccessible()) {
+            if (targetX >= 0 && targetX < this.elements.length &&
+                    targetY >= 0 && targetY < this.elements[0].length &&
+                    this.elements[targetX][targetY] != null &&
+                    this.elements[targetX][targetY].isAccessible()) {
 
                 if (e instanceof Mouton && elements[targetX][targetY] instanceof Sortie) {
                     coordonneesValides.add(coord);
@@ -428,14 +430,13 @@ public class Grille {
         return chemin;
     }
 
-    private int getCoutDeplacement(Elements elem, Animal a) {
-        if (a instanceof Mouton) {
-            if (elem instanceof Marguerite) return 1;
-            if (elem instanceof Cactus) return 3;
-            return 2;
-        }
-        return 1;
-    }
+private int getCoutDeplacement(Elements e, Animal a) {
+    // On peut adapter selon le type d’élément
+    if (e instanceof Herbe) return 1;
+    if (e instanceof Sortie) return 1;
+    if (e instanceof Rocher) return Integer.MAX_VALUE; // Devrait être inaccessible
+    return 1;
+}
     public int manhattan(int debx , int deby, int finx , int finy){
         return Math.abs(debx-finx) + Math.abs(deby-finy);
     }
