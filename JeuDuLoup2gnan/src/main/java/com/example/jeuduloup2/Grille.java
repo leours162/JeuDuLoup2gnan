@@ -460,6 +460,7 @@ private int getCoutDeplacement(Elements e, Animal a) {
         return Math.abs(debx-finx) + Math.abs(deby-finy);
     }
 
+    //version 1 ne prenant pas en compte les obstacles
     public int[][] heuristic(int x , int y){
         int[][] heuristic = new int[nbLignes][nbColonnes];
         for (int i = 0; i < nbLignes; i++){
@@ -468,6 +469,8 @@ private int getCoutDeplacement(Elements e, Animal a) {
             }
         }
         return heuristic;}
+
+
     public int[][] heuristique2(int finx, int finy) {
         int[][] distances = new int[nbColonnes][nbLignes]; // Attention : colonnes x lignes
         for (int i = 0; i < nbColonnes; i++) {
@@ -538,7 +541,7 @@ private int getCoutDeplacement(Elements e, Animal a) {
         for (int i = 0; i < nbColonnes; i++) {
             for (int j = 0; j < nbLignes; j++) {
                 if (heuristic[i][j] == -1) {
-                    heuristic[i][j] = 9999;
+                    heuristic[i][j] = Integer.MAX_VALUE;
                 }
             }
         }
