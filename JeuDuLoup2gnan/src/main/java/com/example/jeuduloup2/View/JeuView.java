@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Optional;
 
 public class JeuView extends Application {
     private boolean grilleimportee = false;
@@ -308,7 +309,7 @@ public class JeuView extends Application {
                 if (element instanceof Mouton) {
                     Mouton mouton = (Mouton) element;
                     int key = j * 1000 + i;
-                    moutons.put(key, mouton);
+                    moutons.put(Integer.valueOf(key), mouton);
                 }
             }
         }
@@ -318,8 +319,8 @@ public class JeuView extends Application {
     private void updateMoutonPosition(int oldX, int oldY, int newX, int newY, Mouton mouton) {
         int oldKey = oldX * 1000 + oldY;
         int newKey = newX * 1000 + newY;
-        moutons.remove(oldKey);
-        moutons.put(newKey, mouton);
+        moutons.remove(Optional.of(oldKey));
+        moutons.put(Integer.valueOf(newKey), mouton);
     }
 
     // On gere tout le jeu ici
@@ -536,38 +537,79 @@ public class JeuView extends Application {
             Mouton mouton = (Mouton) animal;
             grille.remplacer(newX, newY, mouton);
             updateMoutonPosition(oldX, oldY, newX, newY, mouton);
+            updateMoutonPosition(oldX, oldY, newX, newY, mouton);
         }
         incrementerTour();
     }
 
-    public void setAutomatiserDijkstra (Animal animal, Sortie s) throws InterruptedException {
-       if (animal instanceof Mouton) {
-           List cell = grille.cheminLePlusCourt(animal.getX(),animal.getY(), s.getX(),s.getY(), animal);
-           System.out.println(cell);
-           for (int i = 0; i < cell.size(); i++) {
-               Rectangle highlight = new Rectangle(50, 50);
-               highlight.setFill(Color.GREEN.deriveColor(0, 1, 1, 0.5));
-               Thread.sleep(500);
-           }
-           if (cell.size() <= 1) return;
-           int[] deplacement = (int[]) cell.get(1);
+    public void setAutomatiserDijkstra(Animal animal, Sortie s) throws InterruptedException {
+        if (animal instanceof Mouton) {
+            List<int[]> cell = grille.cheminLePlusCourt(animal.getX(), animal.getY(), s.getX(), s.getY(),animal);
 
-           handleCellClick(deplacement[0],deplacement[1]);
-           coMouton = (int[]) cell.get(animal.getVitesse());
-       }
-       else if (animal instanceof Loup) {
-           List cell = grille.cheminLePlusCourt(animal.getX(),animal.getY(), coMouton[0],coMouton[1], animal);
-           for (int i = 0; i < cell.size(); i++) {
-               Rectangle highlight = new Rectangle(50, 50);
-               highlight.setFill(Color.RED.deriveColor(0, 1, 1, 0.5));
-               Thread.sleep(500);
-           }
-           if (cell.size() <= 1) return;
-           int[] deplacement = (int[]) cell.get(1);
+            // Vérifier que le chemin existe et a au moins 2 éléments
+            if (cell == null || cell.size() <= 1) {
+                System.out.println("Aucun chemin trouvé ou chemin trop court");
+                return;
+            }
 
-           handleCellClick(deplacement[0],deplacement[1]);
-           coLoup = (int[]) cell.get(animal.getVitesse());
-       }
+            // Affichage du chemin (optionnel)
+            for (int i = 0; i < cell.size(); i++) {
+                Rectangle highlight = new Rectangle(50, 50);
+                highlight.setFill(Color.GREEN.deriveColor(0, 1, 1, 0.5));
+                Thread.sleep(500);
+            }
+
+            // Configurer l'état de sélection AVANT d'appeler handleCellClick
+            animalSelected = true;
+            animalSelectedX = animal.getX();
+            animalSelectedY = animal.getY();
+
+            // Prendre le prochain mouvement (index 1, car index 0 est la position actuelle)
+            int[] deplacement = cell.get(1);
+
+            // Appeler handleCellClick avec la destination
+            handleCellClick(deplacement[0], deplacement[1]);
+
+            // Mettre à jour les coordonnées du mouton après le déplacement réussi
+            // Utiliser la vitesse pour déterminer la nouvelle position, mais vérifier les limites
+            int newIndex = Math.min(animal.getVitesse(), cell.size() - 1);
+            if (newIndex > 0) {
+                coMouton = cell.get(newIndex).clone();
+            }
+
+        } else if (animal instanceof Loup) {
+            List<int[]> cell = grille.cheminLePlusCourt(animal.getX(), animal.getY(), coMouton[0], coMouton[1], animal);
+
+            // Vérifier que le chemin existe et a au moins 2 éléments
+            if (cell == null || cell.size() <= 1) {
+                System.out.println("Aucun chemin trouvé ou chemin trop court");
+                return;
+            }
+
+            // Affichage du chemin (optionnel)
+            for (int i = 0; i < cell.size(); i++) {
+                Rectangle highlight = new Rectangle(50, 50);
+                highlight.setFill(Color.RED.deriveColor(0, 1, 1, 0.5));
+                Thread.sleep(500);
+            }
+
+            // Configurer l'état de sélection AVANT d'appeler handleCellClick
+            animalSelected = true;
+            animalSelectedX = animal.getX();
+            animalSelectedY = animal.getY();
+
+            // Prendre le prochain mouvement
+            int[] deplacement = cell.get(1);
+
+            // Appeler handleCellClick avec la destination
+            handleCellClick(deplacement[0], deplacement[1]);
+
+            // Mettre à jour les coordonnées du loup après le déplacement réussi
+            int newIndex = Math.min(animal.getVitesse(), cell.size() - 1);
+            if (newIndex > 0) {
+                coLoup = cell.get(newIndex).clone();
+            }
+        }
     }
 
     public void setAutomatiserAetoile (Animal animal, Sortie s) throws InterruptedException {
