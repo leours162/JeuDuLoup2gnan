@@ -840,14 +840,15 @@
         }
 
         // NOUVELLE MÉTHODE : Mettre à jour l'interface pour la simulation automatique
+// MÉTHODE CORRIGÉE : Mettre à jour l'interface pour la simulation automatique
         private void mettreAJourInterfaceAutomatique(Animal animal, int oldX, int oldY, int newX, int newY) {
             // 1. EFFACER L'ANCIENNE POSITION ET FAIRE REPOUSSER UN VÉGÉTAL
             StackPane oldCell = cellules[oldX][oldY];
             oldCell.getChildren().clear();
 
-            // NOUVELLE LOGIQUE : Différencier selon l'animal qui se déplace
-            if (animal instanceof Mouton) {
-                // Si c'est le mouton, TOUJOURS mettre de l'herbe
+            // LOGIQUE CORRIGÉE : Selon le comportement attendu
+            if (animal instanceof Loup) {
+                // Si c'est le LOUP, TOUJOURS mettre de l'herbe (comme dans mettreAJourInterface)
                 Herbe nouvelleHerbe = new Herbe(oldX, oldY);
                 grille.remplacer(oldX, oldY, nouvelleHerbe);
 
@@ -857,7 +858,7 @@
                     oldCell.getChildren().add(herbeView);
                 }
             } else {
-                // Si c'est le loup, mettre un végétal aléatoire
+                // Si c'est le MOUTON, mettre un végétal aléatoire (comme dans mettreAJourInterface)
                 Vegetaux nouveauVegetal = genererVegetalAleatoire(oldX, oldY);
                 grille.remplacer(oldX, oldY, nouveauVegetal);
 
