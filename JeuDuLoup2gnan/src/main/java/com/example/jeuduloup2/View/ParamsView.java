@@ -17,7 +17,7 @@ import javafx.stage.Stage;
 import javafx.scene.control.ToggleGroup;
 public class ParamsView extends Application {
 
-
+    public static boolean utiliserAEtoile = false;
 
     private StackPane creerBoutonImage(Image image, Runnable action) {
         ImageView icone = new ImageView(image);
@@ -64,6 +64,8 @@ public class ParamsView extends Application {
             stage.close();
         });
 
+
+
         HBox barreHaut = new HBox(250, boutonRetour, titre, logoView);
         barreHaut.setAlignment(Pos.CENTER);
         barreHaut.setPadding(new Insets(20));
@@ -88,26 +90,42 @@ public class ParamsView extends Application {
         Systeme.setStyle("-fx-fill: white; -fx-font-weight: bold; -fx-font-size: 40px;");
 
         Text systeme = new Text("Qui joue en premier ?");
-        systeme.setStyle("-fx-fill: white; -fx-font-size: 60px;");
+        systeme.setStyle("-fx-fill: white; -fx-font-size: 40px;"); // Réduire la taille
         ToggleGroup groupe = new ToggleGroup();
 
         RadioButton Loup = new RadioButton("Loup");
         Loup.setToggleGroup(groupe);
-        Loup.setStyle("-fx-font-size: 30px; -fx-text-fill: white;");
+        Loup.setStyle("-fx-font-size: 25px; -fx-text-fill: white;");
+        Loup.setSelected(true);
         Loup.setOnMouseClicked(e -> JeuView.setAnimal(true));
 
         RadioButton Mouton = new RadioButton("Mouton");
         Mouton.setToggleGroup(groupe);
-        Mouton.setStyle("-fx-font-size: 30px; -fx-text-fill: white;");
+        Mouton.setStyle("-fx-font-size: 25px; -fx-text-fill: white;");
         Mouton.setOnMouseClicked(e -> JeuView.setAnimal(false));
 
-        VBox blocSysteme = new VBox(10, Systeme, systeme, Loup, Mouton);
+        Text algorithmeLabel = new Text("Algorithme :");
+        algorithmeLabel.setStyle("-fx-fill: white; -fx-font-size: 40px;");
+
+        ToggleGroup groupeAlgorithme = new ToggleGroup();
+
+        RadioButton dijkstra = new RadioButton("Dijkstra");
+        dijkstra.setToggleGroup(groupeAlgorithme);
+        dijkstra.setStyle("-fx-font-size: 25px; -fx-text-fill: white;");
+        dijkstra.setSelected(true); // Sélectionné par défaut
+        dijkstra.setOnMouseClicked(e -> utiliserAEtoile = false);
+
+        RadioButton aEtoile = new RadioButton("A* (A-Star)");
+        aEtoile.setToggleGroup(groupeAlgorithme);
+        aEtoile.setStyle("-fx-font-size: 25px; -fx-text-fill: white;");
+        aEtoile.setOnMouseClicked(e -> utiliserAEtoile = true);
+
+        VBox blocSysteme = new VBox(10, Systeme, systeme, Loup, Mouton, algorithmeLabel, dijkstra, aEtoile);
         blocSysteme.setStyle("-fx-background-color: rgba(255, 255, 255, 0.1); -fx-background-radius: 30px;");
         blocSysteme.setAlignment(Pos.CENTER);
         blocSysteme.setPadding(new Insets(20));
         blocSysteme.setPrefWidth(400);
-        blocSysteme.setPrefHeight(250);
-
+        blocSysteme.setPrefHeight(350);
 
         HBox centre = new HBox(blocAudio,blocSysteme);
         centre.setAlignment(Pos.CENTER);
@@ -126,6 +144,10 @@ public class ParamsView extends Application {
         stage.setScene(scene);
         stage.setResizable(false);
         stage.show();
+    }
+
+    public static boolean utiliseAEtoile() {
+        return utiliserAEtoile;
     }
 
     public static void main(String[] args) {

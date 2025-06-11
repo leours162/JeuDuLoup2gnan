@@ -373,60 +373,80 @@ public class Grille {
     }
 
 
-    public List<int[]> cheminLePlusCourt( int startX, int startY, int cibleX, int cibleY, Animal a) {
-        int[][] directions = { {0,1}, {1,0}, {0,-1}, {-1,0} };
-        int[][] dist = new int[nbColonnes][nbLignes];
-        int[][][] prev = new int[nbColonnes][nbLignes][2];
+    public ArrayList<int[]> cheminLePlusCourt(int departX, int departY, int arriveeX, int arriveeY, Animal animal) {
+        int[][] distances = new int[nbColonnes][nbLignes];                     // Distance minimale depuis la case de départ
+        boolean[][] dejaVisite = new boolean[nbColonnes][nbLignes];           // Marque les cases déjà explorées
+        int[][][] precedent = new int[nbColonnes][nbLignes][2];               // Pour reconstituer le chemin final
+        int[][] directions = {{0, 1}, {1, 0}, {0, -1}, {-1, 0}};               // Déplacements possibles : haut, droite, bas, gauche
 
-        for (int i = 0; i < nbColonnes; i++) {
-            Arrays.fill(dist[i], Integer.MAX_VALUE);
+        // Initialisation : toutes les distances sont infinies sauf le point de départ
+        for (int x = 0; x < nbColonnes; x++) {
+            Arrays.fill(distances[x], Integer.MAX_VALUE);
         }
-        dist[startX][startY] = 0;
+        distances[departX][departY] = 0;
 
-        PriorityQueue<int[]> pq = new PriorityQueue<>(Comparator.comparingInt(c -> c[2]));
-        pq.offer(new int[]{startX, startY, 0});
+        // Algorithme de Dijkstra (version simple sans file de priorité)
+        while (true) {
+            int distMin = Integer.MAX_VALUE;
+            int caseX = -1, caseY = -1;
 
-        while (!pq.isEmpty()) {
-            int[] curr = pq.poll();
-            int x = curr[0], y = curr[1], d = curr[2];
+            // On cherche la case non encore visitée ayant la plus petite distance
+            for (int x = 0; x < nbColonnes; x++) {
+                for (int y = 0; y < nbLignes; y++) {
+                    if (!dejaVisite[x][y] && distances[x][y] < distMin) {
+                        distMin = distances[x][y];
+                        caseX = x;
+                        caseY = y;
+                    }
+                }
+            }
 
-            if (x == cibleX && y == cibleY) break;
+            // Si aucune case n'a été trouvée ou si on a atteint la cible, on sort de la boucle
+            if (caseX == -1 || (caseX == arriveeX && caseY == arriveeY)) break;
 
-            for (int[] dir : directions) {
-                int nx = x + dir[0];
-                int ny = y + dir[1];
+            dejaVisite[caseX][caseY] = true;
 
-                if (nx < 0 || ny < 0 || nx >= nbColonnes || ny >= nbLignes)
+            // Pour chaque direction, on regarde les voisins accessibles
+            for (int[] direction : directions) {
+                int voisinX = caseX + direction[0];
+                int voisinY = caseY + direction[1];
+
+                // Vérification des limites de la grille
+                if (voisinX < 0 || voisinY < 0 || voisinX >= nbColonnes || voisinY >= nbLignes)
                     continue;
 
-                Elements elem = elements[nx][ny];
-                if (elem == null || !elem.isAccessible()) continue;
-                if (a instanceof Loup && elem instanceof Sortie) continue;
+                Elements voisin = elements[voisinX][voisinY];
+                if (voisin == null || !voisin.isAccessible()) continue;
 
-                int cost = getCoutDeplacement(elem, a);
-                int newDist = d + cost;
+                // Le loup ne peut pas aller sur une case de sortie
+                if (animal instanceof Loup && voisin instanceof Sortie) continue;
 
-                if (newDist < dist[nx][ny]) {
-                    dist[nx][ny] = newDist;
-                    prev[nx][ny][0] = x;
-                    prev[nx][ny][1] = y;
-                    pq.offer(new int[]{nx, ny, newDist});
+                // Calcul du coût pour aller sur la case voisine
+                int cout = getCoutDeplacement(voisin, animal);
+                int nouvelleDistance = distances[caseX][caseY] + cout;
+
+                if (nouvelleDistance < distances[voisinX][voisinY]) {
+                    distances[voisinX][voisinY] = nouvelleDistance;
+                    precedent[voisinX][voisinY][0] = caseX;
+                    precedent[voisinX][voisinY][1] = caseY;
                 }
             }
         }
 
-        LinkedList<int[]> chemin = new LinkedList<>();
-        int x = cibleX, y = cibleY;
-        if (dist[x][y] == Integer.MAX_VALUE) return chemin;
+        // Reconstruction du chemin depuis la cible vers le départ
+        ArrayList<int[]> chemin = new ArrayList<>();
+        if (distances[arriveeX][arriveeY] == Integer.MAX_VALUE) return chemin; // Aucun chemin trouvé
 
-        while (x != startX || y != startY) {
-            chemin.addFirst(new int[]{x, y});
-            int px = prev[x][y][0];
-            int py = prev[x][y][1];
-            x = px;
-            y = py;
+        int x = arriveeX, y = arriveeY;
+        while (x != departX || y != departY) {
+            chemin.add(0, new int[]{x, y});
+            int precX = precedent[x][y][0];
+            int precY = precedent[x][y][1];
+            x = precX;
+            y = precY;
         }
-        chemin.addFirst(new int[]{startX, startY});
+        chemin.add(0, new int[]{departX, departY});
+
         return chemin;
     }
 
@@ -440,6 +460,7 @@ private int getCoutDeplacement(Elements e, Animal a) {
         return Math.abs(debx-finx) + Math.abs(deby-finy);
     }
 
+    //version 1 ne prenant pas en compte les obstacles
     public int[][] heuristic(int x , int y){
         int[][] heuristic = new int[nbLignes][nbColonnes];
         for (int i = 0; i < nbLignes; i++){
@@ -448,41 +469,38 @@ private int getCoutDeplacement(Elements e, Animal a) {
             }
         }
         return heuristic;}
-    public int[][] heuristique2(int x, int y) {
-        int rows = elements.length;
-        int cols = elements[0].length;
 
-        int[][] distances = new int[rows][cols];
-        for (int i = 0; i < rows; i++) {
-            for (int j = 0; j < cols; j++) {
+
+    public int[][] heuristique2(int finx, int finy) {
+        int[][] distances = new int[nbColonnes][nbLignes]; // Attention : colonnes x lignes
+        for (int i = 0; i < nbColonnes; i++) {
+            for (int j = 0; j < nbLignes; j++) {
                 distances[i][j] = -1;
             }
         }
 
-
         ArrayList<int[]> currentLevel = new ArrayList<>();
-
         ArrayList<int[]> nextLevel = new ArrayList<>();
 
-
-        currentLevel.add(new int[]{x, y});
-        distances[x][y] = 0;
+        currentLevel.add(new int[]{finx, finy}); // Depuis la FIN
+        distances[finx][finy] = 0;
 
         int[][] directions = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
         int currentDistance = 0;
 
         while (!currentLevel.isEmpty()) {
-
             for (int i = 0; i < currentLevel.size(); i++) {
                 int[] current = currentLevel.get(i);
                 int currentX = current[0];
                 int currentY = current[1];
+
                 for (int[] dir : directions) {
                     int newX = currentX + dir[0];
                     int newY = currentY + dir[1];
-                    if (newX >= 0 && newX < rows &&
-                            newY >= 0 && newY < cols &&
-                            elements[newX][newY] != null &&  // protection ajoutée ici
+
+                    if (newX >= 0 && newX < nbColonnes &&
+                            newY >= 0 && newY < nbLignes &&
+                            elements[newX][newY] != null &&
                             elements[newX][newY].isAccessible() &&
                             distances[newX][newY] == -1) {
 
@@ -499,52 +517,119 @@ private int getCoutDeplacement(Elements e, Animal a) {
 
         return distances;
     }
+
     public ArrayList<int[]> aEtoile(int depx, int depy, int finx, int finy) {
-        int[][] heuristic = heuristique2(depx, depy);
-        for (int i = 0; i < heuristic.length; i++){
-            for (int j = 0; j < heuristic[0].length; j++){
-                if (heuristic[i][j] == -1){
-                    heuristic[i][j]=99;
+        int[][] heuristic = heuristique2(finx, finy); // Depuis la FIN
+
+        // Matrices pour A* - Attention : colonnes x lignes
+        int[][] gCost = new int[nbColonnes][nbLignes]; // Coût depuis le début
+        int[][] fCost = new int[nbColonnes][nbLignes]; // g + h
+        boolean[][] closedList = new boolean[nbColonnes][nbLignes];
+        int[][][] parent = new int[nbColonnes][nbLignes][2]; // Pour reconstruire le chemin
+
+        // Initialiser les coûts
+        for (int i = 0; i < nbColonnes; i++) {
+            for (int j = 0; j < nbLignes; j++) {
+                gCost[i][j] = Integer.MAX_VALUE;
+                fCost[i][j] = Integer.MAX_VALUE;
+                parent[i][j][0] = -1;
+                parent[i][j][1] = -1;
+            }
+        }
+
+        // Remplacer -1 par une valeur élevée pour les cases inaccessibles
+        for (int i = 0; i < nbColonnes; i++) {
+            for (int j = 0; j < nbLignes; j++) {
+                if (heuristic[i][j] == -1) {
+                    heuristic[i][j] = Integer.MAX_VALUE;
                 }
             }
         }
-        ArrayList<int[]> leChemin = new ArrayList<>();
 
-        int currentX = depx;
-        int currentY = depy;
+        // Liste ouverte : positions à explorer
+        ArrayList<int[]> openList = new ArrayList<>();
 
+        // Nœud de départ
+        gCost[depx][depy] = 0;
+        fCost[depx][depy] = heuristic[depx][depy];
+        openList.add(new int[]{depx, depy});
 
-        leChemin.add(new int[]{currentX, currentY});
+        int[][] directions = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
 
+        while (!openList.isEmpty()) {
+            // Trouver le nœud avec le plus petit fCost dans openList
+            int bestIndex = 0;
+            for (int i = 1; i < openList.size(); i++) {
+                int[] pos = openList.get(i);
+                int[] bestPos = openList.get(bestIndex);
+                if (fCost[pos[0]][pos[1]] < fCost[bestPos[0]][bestPos[1]]) {
+                    bestIndex = i;
+                }
+            }
 
-        while (currentX != finx || currentY != finy) {
-            int bestX = currentX;
-            int bestY = currentY;
-            int bestHeuristic = Integer.MAX_VALUE;
+            int[] current = openList.remove(bestIndex);
+            int currentX = current[0];
+            int currentY = current[1];
 
+            // Si on a atteint la destination
+            if (currentX == finx && currentY == finy) {
+                // Reconstruire le chemin
+                ArrayList<int[]> leChemin = new ArrayList<>();
+                int x = finx, y = finy;
 
+                while (x != -1 && y != -1) {
+                    leChemin.add(0, new int[]{x, y});
+                    int tempX = parent[x][y][0];
+                    int tempY = parent[x][y][1];
+                    x = tempX;
+                    y = tempY;
+                }
 
-            int[][] directions = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
+                return leChemin;
+            }
 
+            // Marquer comme exploré
+            closedList[currentX][currentY] = true;
 
+            // Explorer les voisins
             for (int[] dir : directions) {
                 int newX = currentX + dir[0];
                 int newY = currentY + dir[1];
 
-                if (newX >= 0 && newX < nbLignes && newY >= 0 && newY < nbColonnes) {
+                // Vérifier les limites et l'accessibilité
+                if (newX >= 0 && newX < nbColonnes && newY >= 0 && newY < nbLignes &&
+                        !closedList[newX][newY] &&
+                        elements[newX][newY] != null &&
+                        elements[newX][newY].isAccessible()) {
 
-                    if (heuristic[newX][newY] < bestHeuristic) {
-                        bestHeuristic = heuristic[newX][newY];
-                        bestX = newX;
-                        bestY = newY;
+                    int tentativeG = gCost[currentX][currentY] + 1;
+
+                    // Si ce chemin vers le voisin est meilleur
+                    if (tentativeG < gCost[newX][newY]) {
+                        parent[newX][newY][0] = currentX;
+                        parent[newX][newY][1] = currentY;
+                        gCost[newX][newY] = tentativeG;
+                        fCost[newX][newY] = gCost[newX][newY] + heuristic[newX][newY];
+
+                        // Ajouter à openList si pas déjà présent
+                        boolean inOpenList = false;
+                        for (int[] pos : openList) {
+                            if (pos[0] == newX && pos[1] == newY) {
+                                inOpenList = true;
+                                break;
+                            }
+                        }
+
+                        if (!inOpenList) {
+                            openList.add(new int[]{newX, newY});
+                        }
                     }
                 }
             }
-            currentX = bestX;
-            currentY = bestY;
-            leChemin.add(new int[]{currentX, currentY});
         }
-        return leChemin;
+
+        // Aucun chemin trouvé
+        return new ArrayList<>();
     }
 
 }
