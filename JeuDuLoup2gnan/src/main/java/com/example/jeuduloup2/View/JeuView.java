@@ -408,12 +408,16 @@
             }
 
             if (nouvellePosition != null) {
-                // MISE À JOUR SYNCHRONE des coordonnées AVANT l'interface
+                // SAUVEGARDER les anciennes coordonnées AVANT de déplacer l'animal
+                int oldX = animal.getX();
+                int oldY = animal.getY();
+
+                // Déplacer l'animal
                 animal.bouger(nouvellePosition[0], nouvellePosition[1]);
 
-                // Puis mise à jour asynchrone de l'interface
+                // Puis mise à jour asynchrone de l'interface avec les bonnes coordonnées
                 Platform.runLater(() -> {
-                    mettreAJourInterfaceAutomatique(animal, nouvellePosition[0], nouvellePosition[1]);
+                    mettreAJourInterfaceAutomatique(animal, oldX, oldY, nouvellePosition[0], nouvellePosition[1]);
                 });
 
                 // Attendre que l'interface soit mise à jour
@@ -460,9 +464,45 @@
                     effacerDeplacementsPossibles();
                 });
 
-                // Calculer jusqu'où l'animal peut aller selon sa vitesse
-                int maxIndex = Math.min(animal.getVitesse(), chemin.size() - 1);
-                return chemin.get(maxIndex);
+                // MODIFICATION ICI : Calculer la distance maximale selon la vitesse
+                int vitesseMax = animal.getVitesse();
+                int distanceMax = 0;
+                int indexOptimal = 1; // Au minimum, on avance d'une case
+
+                // Parcourir le chemin et trouver jusqu'où on peut aller avec la vitesse max
+                for (int i = 1; i < chemin.size(); i++) {
+                    int[] currentPos = chemin.get(i);
+                    int[] startPos = chemin.get(0);
+
+                    // Calculer la distance Manhattan depuis le départ
+                    int distance = Math.abs(currentPos[0] - startPos[0]) + Math.abs(currentPos[1] - startPos[1]);
+
+                    if (distance <= vitesseMax) {
+                        distanceMax = distance;
+                        indexOptimal = i;
+                    } else {
+                        break; // On a dépassé la vitesse max
+                    }
+                }
+
+                // Si on n'a pas utilisé toute la vitesse et qu'il reste du chemin,
+                // essayer d'aller plus loin en utilisant EXACTEMENT la vitesse max
+                if (distanceMax < vitesseMax && indexOptimal < chemin.size() - 1) {
+                    // Chercher une position qui utilise exactement la vitesse max
+                    for (int i = indexOptimal + 1; i < chemin.size(); i++) {
+                        int[] pos = chemin.get(i);
+                        int[] startPos = chemin.get(0);
+                        int distance = Math.abs(pos[0] - startPos[0]) + Math.abs(pos[1] - startPos[1]);
+
+                        if (distance == vitesseMax) {
+                            return pos;
+                        } else if (distance > vitesseMax) {
+                            break;
+                        }
+                    }
+                }
+
+                return chemin.get(indexOptimal);
             }
 
             return null;
@@ -583,86 +623,104 @@
         // NOUVELLE MÉTHODE : Obtenir position aléatoire
         private int[] obtenirPositionAleatoire(Animal animal) {
             int[][] deplacementsPossibles = grille.lesDeplacements(animal);
+            int vitesseMax = animal.getVitesse();
 
-            if (deplacementsPossibles.length > 0) {
-                int indexAleatoire = random.nextInt(deplacementsPossibles.length);
-                return deplacementsPossibles[indexAleatoire];
+            // Filtrer pour ne garder que les déplacements à vitesse maximale
+            ArrayList<int[]> deplacementsVitesseMax = new ArrayList<>();
+
+            for (int[] deplacement : deplacementsPossibles) {
+                int distance = Math.abs(deplacement[0] - animal.getX()) + Math.abs(deplacement[1] - animal.getY());
+                if (distance == vitesseMax) {
+                    deplacementsVitesseMax.add(deplacement);
+                }
+            }
+
+            // Si aucun déplacement à vitesse max n'est possible, prendre le plus loin possible
+            if (deplacementsVitesseMax.isEmpty()) {
+                int distanceMaxTrouvee = 0;
+                for (int[] deplacement : deplacementsPossibles) {
+                    int distance = Math.abs(deplacement[0] - animal.getX()) + Math.abs(deplacement[1] - animal.getY());
+                    if (distance > distanceMaxTrouvee) {
+                        distanceMaxTrouvee = distance;
+                        deplacementsVitesseMax.clear();
+                        deplacementsVitesseMax.add(deplacement);
+                    } else if (distance == distanceMaxTrouvee) {
+                        deplacementsVitesseMax.add(deplacement);
+                    }
+                }
+            }
+
+            if (!deplacementsVitesseMax.isEmpty()) {
+                int indexAleatoire = random.nextInt(deplacementsVitesseMax.size());
+                return deplacementsVitesseMax.get(indexAleatoire);
             }
 
             return null;
         }
 
         // NOUVELLE MÉTHODE : Mettre à jour l'interface pour la simulation automatique
-        private void mettreAJourInterfaceAutomatique(Animal animal, int newX, int newY) {
-            int oldX = animal.getX();
-            int oldY = animal.getY();
-
-            // Effacer l'ancienne position
-
-
-            // Si c'est le mouton, faire repousser un végétal et le nourrir
-            if (animal instanceof Mouton) {
-                Mouton mouton = (Mouton) animal;
-                Elements elementActuel = grille.getElement(oldX, oldY);
-
-                if (elementActuel instanceof Vegetaux) {
-                    mouton.manger((Vegetaux) elementActuel);
-
-                    // Mettre à jour les compteurs - CORRECTION ICI
-                    if (elementActuel instanceof Herbe) {
-                        herbeMangée++;
-                        Platform.runLater(() -> cptHerbe.setText(String.valueOf(herbeMangée)));
-                    } else if (elementActuel instanceof Marguerite) {
-                        margueritéMangée++;
-                        Platform.runLater(() -> cptMarguerite.setText(String.valueOf(margueritéMangée)));
-                    } else if (elementActuel instanceof Cactus) {
-                        cactusMangé++;
-                        Platform.runLater(() -> cptCactus.setText(String.valueOf(cactusMangé)));
-                    }
-
-                    Platform.runLater(() -> vitesseLabel.setText("Vitesse mouton: " + mouton.getVitesse()));
-                }
-
-                // Faire repousser un végétal aléatoire
-
-            }
-
-            // Déplacer l'animal
-            animal.bouger(newX, newY);
-
+        // NOUVELLE MÉTHODE : Mettre à jour l'interface pour la simulation automatique
+        private void mettreAJourInterfaceAutomatique(Animal animal, int oldX, int oldY, int newX, int newY) {
+            // 1. EFFACER L'ANCIENNE POSITION ET FAIRE REPOUSSER UN VÉGÉTAL
             StackPane oldCell = cellules[oldX][oldY];
             oldCell.getChildren().clear();
+
+            // Créer un nouveau végétal aléatoire pour remplacer l'animal
             Vegetaux nouveauVegetal = genererVegetalAleatoire(oldX, oldY);
             grille.remplacer(oldX, oldY, nouveauVegetal);
 
+            // Afficher le nouveau végétal
             ImageView vegetalView = creerImageViewPourElement(nouveauVegetal);
-            oldCell.getChildren().add(vegetalView);
-            // CORRECTION : Ne pas remplacer l'animal dans la grille s'il a été mangé
-            if (animal instanceof Mouton && newX == loupInstance.getX() && newY == loupInstance.getY()) {
-                // Le mouton a été mangé, ne pas le replacer dans la grille
-                return;
+            if (vegetalView != null) {
+                oldCell.getChildren().add(vegetalView);
             }
 
+            // 2. GÉRER L'ALIMENTATION DU MOUTON (si applicable)
+            if (animal instanceof Mouton) {
+                Mouton mouton = (Mouton) animal;
+                Elements elementDestination = grille.getElement(newX, newY);
+
+                // Si le mouton arrive sur un végétal, il le mange
+                if (elementDestination instanceof Vegetaux) {
+                    mouton.manger((Vegetaux) elementDestination);
+
+                    // Mettre à jour les compteurs
+                    if (elementDestination instanceof Herbe) {
+                        herbeMangée++;
+                        cptHerbe.setText(String.valueOf(herbeMangée));
+                    } else if (elementDestination instanceof Marguerite) {
+                        margueritéMangée++;
+                        cptMarguerite.setText(String.valueOf(margueritéMangée));
+                    } else if (elementDestination instanceof Cactus) {
+                        cactusMangé++;
+                        cptCactus.setText(String.valueOf(cactusMangé));
+                    }
+
+                    vitesseLabel.setText("Vitesse mouton: " + mouton.getVitesse());
+                }
+            }
+
+            // 3. METTRE L'ANIMAL DANS LA GRILLE À SA NOUVELLE POSITION
             grille.remplacer(newX, newY, animal);
 
-            // Mettre à jour la nouvelle position
+            // 4. METTRE À JOUR L'AFFICHAGE DE LA NOUVELLE POSITION
             StackPane newCell = cellules[newX][newY];
             newCell.getChildren().clear();
 
+            // Afficher l'animal à sa nouvelle position
             ImageView animalView = creerImageViewPourElement(animal);
             if (animalView != null) {
                 newCell.getChildren().add(animalView);
             }
 
-            // Si c'est la sortie, remettre le marqueur doré
-            if (grille.getElement(newX, newY) instanceof Sortie ||
-                    (newX == coSortie[0] && newY == coSortie[1])) {
+            // 5. SI C'EST LA SORTIE, REMETTRE LE MARQUEUR DORÉ
+            if (newX == coSortie[0] && newY == coSortie[1]) {
                 Rectangle exitMarker = new Rectangle(50, 50);
                 exitMarker.setFill(Color.GOLD.deriveColor(0, 1, 1, 0.3));
                 newCell.getChildren().add(exitMarker);
             }
 
-            // Mettre à jour les coordonnées
+            // 6. METTRE À JOUR LES COORDONNÉES DE RÉFÉRENCE
             if (animal instanceof Loup) {
                 coLoup[0] = newX;
                 coLoup[1] = newY;
@@ -670,8 +728,6 @@
                 coMouton[0] = newX;
                 coMouton[1] = newY;
             }
-
-
         }
 
         // NOUVELLE MÉTHODE : Créer ImageView pour un élément
