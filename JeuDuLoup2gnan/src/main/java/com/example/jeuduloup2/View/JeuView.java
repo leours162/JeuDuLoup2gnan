@@ -68,7 +68,6 @@
         private Stage currentStage;
         private Random random = new Random();
 
-        // Variables pour la simulation automatique
         private Loup loupInstance;
         private Mouton moutonInstance;
         private Sortie sortieInstance;
@@ -79,7 +78,6 @@
 
         @Override
         public void start(Stage primaryStage) throws IOException, InterruptedException {
-            // Code d'initialisation existant...
             if (grilleimportee) {
                 BufferedReader reader = new BufferedReader(new FileReader(fichierGrille));
                 String line;
@@ -105,17 +103,17 @@
 
                         switch (Character.toLowerCase(c)) {
                             case 'm':
-                                moutonInstance = new Mouton(x, y);  // ✅ Instance unique
+                                moutonInstance = new Mouton(x, y);
                                 grille.remplacer(x, y, moutonInstance);
                                 coMouton[0] = x;
                                 coMouton[1] = y;
-                                break; // ❌ AJOUT DU BREAK MANQUANT
+                                break;
                             case 'l':
-                                loupInstance = new Loup(x, y);      // ✅ Instance unique
+                                loupInstance = new Loup(x, y);
                                 grille.remplacer(x, y, loupInstance);
                                 coLoup[0] = x;
                                 coLoup[1] = y;
-                                break; // ❌ AJOUT DU BREAK MANQUANT
+                                break;
                             case 'x':
                                 grille.remplacer(x, y, new Rocher(x, y));
                                 break;
@@ -137,7 +135,6 @@
                             case ' ':
                             case '.':
                             default:
-                                // Laisser vide ou mettre de l'herbe par défaut
                                 grille.remplacer(x, y, new Herbe(x, y));
                                 break;
                         }
@@ -145,7 +142,6 @@
                 }
             }
 
-            // Initialiser les instances d'animaux
             initialiserAnimaux();
 
             this.currentStage = primaryStage;
@@ -170,7 +166,7 @@
             tourPane.setAlignment(Pos.BOTTOM_RIGHT);
             tourPane.setPadding(new Insets(15));
 
-            // Images...
+            // Images
             Image imgMarguerite = new Image(getClass().getResourceAsStream("/com/example/jeuduloup2/marguerite.png"));
             Image imgCactus = new Image(getClass().getResourceAsStream("/com/example/jeuduloup2/cactus.png"));
             Image imgHerbe = new Image(getClass().getResourceAsStream("/com/example/jeuduloup2/herbe.png"));
@@ -306,7 +302,6 @@
             }
         }
 
-        // NOUVELLE MÉTHODE : Initialiser les instances d'animaux
         private void initialiserAnimaux() {
             for (int y = 0; y < grille.getNbLignes(); y++) {
                 for (int x = 0; x < grille.getNbColonnes(); x++) {
@@ -328,16 +323,14 @@
             }
         }
 
-        // NOUVELLE MÉTHODE : Lancer la simulation automatique
         private void lancerSimulationAutomatique() {
             simulationEnCours = true;
             messageLabel.setText("Simulation automatique\nen cours...");
 
             Thread simulationThread = new Thread(() -> {
                 try {
-                    while (!gagne && !perdu && tour < 200) { // Limite de 200 tours
+                    while (!gagne && !perdu) {
 
-                        // 1. Vérifier vision et changer modes
                         boolean loupVoitMouton = peutVoir(loupInstance, moutonInstance);
                         boolean moutonVoitLoup = peutVoir(moutonInstance, loupInstance);
 
@@ -345,7 +338,6 @@
                             tourLabel.setText("Tour " + tour);
                         });
 
-                        // 2. NOUVEAU : Déplacer les animaux selon l'ordre choisi dans les paramètres
                         if (animal) {
                             // Le loup commence (animal = true)
                             deplacerAnimalAutomatique(loupInstance, loupVoitMouton ? moutonInstance : null);
@@ -376,7 +368,6 @@
                                 break;
                             }
                         } else {
-                            // Le mouton commence (animal = false)
                             deplacerAnimalAutomatique(moutonInstance, moutonVoitLoup ? sortieInstance : null);
 
                             // Vérifier si le mouton a atteint la sortie
@@ -395,7 +386,6 @@
 
                             Thread.sleep(500); // Pause pour voir l'animation
 
-                            // Puis le loup
                             deplacerAnimalAutomatique(loupInstance, loupVoitMouton ? moutonInstance : null);
 
                             // Vérifier si le loup a attrapé le mouton
@@ -421,43 +411,34 @@
             simulationThread.start();
         }
 
-        // NOUVELLE MÉTHODE : Vérifier si un animal peut voir un autre
         private boolean peutVoir(Animal observateur, Elements cible) {
             int distance = Math.abs(observateur.getX() - cible.getX()) + Math.abs(observateur.getY() - cible.getY());
             return distance <= 5; // Distance Manhattan <= 5
         }
 
-        // NOUVELLE MÉTHODE : Déplacer un animal automatiquement
         private void deplacerAnimalAutomatique(Animal animal, Elements cible) throws InterruptedException {
             int[] nouvellePosition;
 
             if (cible != null) {
-                // Mode chasse/fuite : utiliser l'algorithme choisi avec affichage du chemin
                 nouvellePosition = obtenirPositionAvecAlgorithmeChoisi(animal, cible);
             } else {
-                // Mode aléatoire
                 nouvellePosition = obtenirPositionAleatoire(animal);
             }
 
             if (nouvellePosition != null) {
-                // SAUVEGARDER les anciennes coordonnées AVANT de déplacer l'animal
                 int oldX = animal.getX();
                 int oldY = animal.getY();
 
-                // Déplacer l'animal
                 animal.bouger(nouvellePosition[0], nouvellePosition[1]);
 
-                // Puis mise à jour asynchrone de l'interface avec les bonnes coordonnées
                 Platform.runLater(() -> {
                     mettreAJourInterfaceAutomatique(animal, oldX, oldY, nouvellePosition[0], nouvellePosition[1]);
                 });
 
-                // Attendre que l'interface soit mise à jour
                 Thread.sleep(100);
             }
         }
 
-        // NOUVELLE MÉTHODE : Obtenir position avec Dijkstra et affichage du calcul en temps réel
         private ArrayList<int[]> calculerCheminDijkstraAvecVisualisation(Animal animal, Elements cible) throws InterruptedException {
             int departX = animal.getX();
             int departY = animal.getY();
@@ -469,7 +450,6 @@
             int[][][] precedent = new int[grille.getNbColonnes()][grille.getNbLignes()][2];
             int[][] directions = {{0, 1}, {1, 0}, {0, -1}, {-1, 0}};
 
-            // Initialisation
             for (int x = 0; x < grille.getNbColonnes(); x++) {
                 for (int y = 0; y < grille.getNbLignes(); y++) {
                     distances[x][y] = Integer.MAX_VALUE;
@@ -479,12 +459,9 @@
             }
             distances[departX][departY] = 0;
 
-            // Algorithme de Dijkstra avec visualisation
             while (true) {
                 int distMin = Integer.MAX_VALUE;
                 int caseX = -1, caseY = -1;
-
-                // Chercher la case non visitée avec la plus petite distance
                 for (int x = 0; x < grille.getNbColonnes(); x++) {
                     for (int y = 0; y < grille.getNbLignes(); y++) {
                         if (!dejaVisite[x][y] && distances[x][y] < distMin) {
@@ -497,7 +474,6 @@
 
                 if (caseX == -1 || (caseX == arriveeX && caseY == arriveeY)) break;
 
-                // VISUALISATION : Montrer la case en cours d'exploration
                 final int currentX = caseX;
                 final int currentY = caseY;
                 Platform.runLater(() -> {
@@ -515,12 +491,10 @@
                     }
                 });
 
-                // Petite pause pour voir la réflexion
                 Thread.sleep(100);
 
                 dejaVisite[caseX][caseY] = true;
 
-                // Explorer les voisins
                 for (int[] direction : directions) {
                     int voisinX = caseX + direction[0];
                     int voisinY = caseY + direction[1];
@@ -544,7 +518,6 @@
                 }
             }
 
-            // Reconstruction du chemin
             ArrayList<int[]> chemin = new ArrayList<>();
             if (distances[arriveeX][arriveeY] == Integer.MAX_VALUE) return chemin;
 
@@ -562,16 +535,12 @@
         }
 
         private int[] obtenirPositionAvecAlgorithmeChoisi(Animal animal, Elements cible) throws InterruptedException {
-            // Utiliser l'algorithme choisi pour calculer le chemin
             ArrayList<int[]> chemin = calculerCheminAvecVisualisation(animal, cible);
 
             if (chemin.size() > 1) {
-                // Afficher le chemin final en couleur différente
                 Platform.runLater(() -> {
-                    // Effacer les cases de réflexion
                     effacerDeplacementsPossibles();
 
-                    // Afficher le chemin final
                     for (int i = 1; i < chemin.size(); i++) {
                         int[] pos = chemin.get(i);
                         int x = pos[0];
@@ -591,39 +560,31 @@
                     }
                 });
 
-                // Attendre pour que l'utilisateur voie le chemin final
                 Thread.sleep(1500);
 
-                // Effacer le chemin affiché
                 Platform.runLater(() -> {
                     effacerDeplacementsPossibles();
                 });
 
-                // MODIFICATION : Calculer la distance maximale selon la vitesse (pour vitesse max)
                 int vitesseMax = animal.getVitesse();
                 int distanceMax = 0;
-                int indexOptimal = 1; // Au minimum, on avance d'une case
+                int indexOptimal = 1;
 
-                // Parcourir le chemin et trouver jusqu'où on peut aller avec la vitesse max
                 for (int i = 1; i < chemin.size(); i++) {
                     int[] currentPos = chemin.get(i);
                     int[] startPos = chemin.get(0);
 
-                    // Calculer la distance Manhattan depuis le départ
                     int distance = Math.abs(currentPos[0] - startPos[0]) + Math.abs(currentPos[1] - startPos[1]);
 
                     if (distance <= vitesseMax) {
                         distanceMax = distance;
                         indexOptimal = i;
                     } else {
-                        break; // On a dépassé la vitesse max
+                        break;
                     }
                 }
 
-                // Si on n'a pas utilisé toute la vitesse et qu'il reste du chemin,
-                // essayer d'aller plus loin en utilisant EXACTEMENT la vitesse max
                 if (distanceMax < vitesseMax && indexOptimal < chemin.size() - 1) {
-                    // Chercher une position qui utilise exactement la vitesse max
                     for (int i = indexOptimal + 1; i < chemin.size(); i++) {
                         int[] pos = chemin.get(i);
                         int[] startPos = chemin.get(0);
@@ -649,10 +610,8 @@
             int arriveeX = cible.getX();
             int arriveeY = cible.getY();
 
-            // Utiliser l'heuristique existante de la grille
             int[][] heuristic = grille.heuristique2(arriveeX, arriveeY);
 
-            // Remplacer -1 par une valeur élevée pour les cases inaccessibles
             for (int i = 0; i < grille.getNbColonnes(); i++) {
                 for (int j = 0; j < grille.getNbLignes(); j++) {
                     if (heuristic[i][j] == -1) {
@@ -661,12 +620,11 @@
                 }
             }
 
-            int[][] gCost = new int[grille.getNbColonnes()][grille.getNbLignes()]; // Coût depuis le début
-            int[][] fCost = new int[grille.getNbColonnes()][grille.getNbLignes()]; // g + h
+            int[][] gCost = new int[grille.getNbColonnes()][grille.getNbLignes()];
+            int[][] fCost = new int[grille.getNbColonnes()][grille.getNbLignes()];
             boolean[][] closedList = new boolean[grille.getNbColonnes()][grille.getNbLignes()];
-            int[][][] parent = new int[grille.getNbColonnes()][grille.getNbLignes()][2]; // Pour reconstruire le chemin
+            int[][][] parent = new int[grille.getNbColonnes()][grille.getNbLignes()][2];
 
-            // Initialiser les coûts
             for (int i = 0; i < grille.getNbColonnes(); i++) {
                 for (int j = 0; j < grille.getNbLignes(); j++) {
                     gCost[i][j] = Integer.MAX_VALUE;
@@ -676,10 +634,8 @@
                 }
             }
 
-            // Liste ouverte : positions à explorer
             ArrayList<int[]> openList = new ArrayList<>();
 
-            // Nœud de départ
             gCost[departX][departY] = 0;
             fCost[departX][departY] = heuristic[departX][departY];
             openList.add(new int[]{departX, departY});
@@ -687,7 +643,6 @@
             int[][] directions = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
 
             while (!openList.isEmpty()) {
-                // Trouver le nœud avec le plus petit fCost dans openList
                 int bestIndex = 0;
                 for (int i = 1; i < openList.size(); i++) {
                     int[] pos = openList.get(i);
@@ -701,28 +656,24 @@
                 int currentX = current[0];
                 int currentY = current[1];
 
-                // VISUALISATION : Montrer la case en cours d'exploration
                 Platform.runLater(() -> {
                     if (currentX >= 0 && currentX < grille.getNbColonnes() &&
                             currentY >= 0 && currentY < grille.getNbLignes()) {
                         Rectangle explorationHighlight = new Rectangle(50, 50);
 
                         if (animal instanceof Loup) {
-                            explorationHighlight.setFill(Color.DARKORANGE.deriveColor(0, 1, 1, 0.5)); // Orange foncé pour A* loup
+                            explorationHighlight.setFill(Color.DARKORANGE.deriveColor(0, 1, 1, 0.5));
                         } else {
-                            explorationHighlight.setFill(Color.DARKTURQUOISE.deriveColor(0, 1, 1, 0.5)); // Turquoise foncé pour A* mouton
+                            explorationHighlight.setFill(Color.DARKTURQUOISE.deriveColor(0, 1, 1, 0.5));
                         }
 
                         cellules[currentX][currentY].getChildren().add(explorationHighlight);
                     }
                 });
 
-                // Petite pause pour voir la réflexion
                 Thread.sleep(100);
 
-                // Si on a atteint la destination
                 if (currentX == arriveeX && currentY == arriveeY) {
-                    // Reconstruire le chemin
                     ArrayList<int[]> leChemin = new ArrayList<>();
                     int x = arriveeX, y = arriveeY;
 
@@ -737,15 +688,12 @@
                     return leChemin;
                 }
 
-                // Marquer comme exploré
                 closedList[currentX][currentY] = true;
 
-                // Explorer les voisins
                 for (int[] dir : directions) {
                     int newX = currentX + dir[0];
                     int newY = currentY + dir[1];
 
-                    // Vérifier les limites et l'accessibilité
                     if (newX >= 0 && newX < grille.getNbColonnes() && newY >= 0 && newY < grille.getNbLignes() &&
                             !closedList[newX][newY]) {
 
@@ -756,14 +704,12 @@
 
                         int tentativeG = gCost[currentX][currentY] + getCoutDeplacement(voisin, animal);
 
-                        // Si ce chemin vers le voisin est meilleur
                         if (tentativeG < gCost[newX][newY]) {
                             parent[newX][newY][0] = currentX;
                             parent[newX][newY][1] = currentY;
                             gCost[newX][newY] = tentativeG;
                             fCost[newX][newY] = gCost[newX][newY] + heuristic[newX][newY];
 
-                            // Ajouter à openList si pas déjà présent
                             boolean inOpenList = false;
                             for (int[] pos : openList) {
                                 if (pos[0] == newX && pos[1] == newY) {
@@ -780,11 +726,9 @@
                 }
             }
 
-            // Aucun chemin trouvé
             return new ArrayList<>();
         }
 
-        // NOUVELLE MÉTHODE : Dijkstra avec visualisation du processus de calcul
         private ArrayList<int[]> calculerCheminAvecVisualisation(Animal animal, Elements cible) throws InterruptedException {
             if (ParamsView.utiliseAEtoile()) {
                 return calculerCheminAEtoileAvecVisualisation(animal, cible);
@@ -793,7 +737,6 @@
             }
         }
 
-        // NOUVELLE MÉTHODE : Calculer coût de déplacement
         private int getCoutDeplacement(Elements e, Animal a) {
             if (e instanceof Herbe) return 1;
             if (e instanceof Sortie) return 1;
@@ -801,12 +744,10 @@
             return 1;
         }
 
-        // NOUVELLE MÉTHODE : Obtenir position aléatoire
         private int[] obtenirPositionAleatoire(Animal animal) {
             int[][] deplacementsPossibles = grille.lesDeplacements(animal);
             int vitesseMax = animal.getVitesse();
 
-            // Filtrer pour ne garder que les déplacements à vitesse maximale
             ArrayList<int[]> deplacementsVitesseMax = new ArrayList<>();
 
             for (int[] deplacement : deplacementsPossibles) {
@@ -816,7 +757,6 @@
                 }
             }
 
-            // Si aucun déplacement à vitesse max n'est possible, prendre le plus loin possible
             if (deplacementsVitesseMax.isEmpty()) {
                 int distanceMaxTrouvee = 0;
                 for (int[] deplacement : deplacementsPossibles) {
@@ -839,46 +779,35 @@
             return null;
         }
 
-        // NOUVELLE MÉTHODE : Mettre à jour l'interface pour la simulation automatique
-// MÉTHODE CORRIGÉE : Mettre à jour l'interface pour la simulation automatique
         private void mettreAJourInterfaceAutomatique(Animal animal, int oldX, int oldY, int newX, int newY) {
-            // 1. EFFACER L'ANCIENNE POSITION ET FAIRE REPOUSSER UN VÉGÉTAL
             StackPane oldCell = cellules[oldX][oldY];
             oldCell.getChildren().clear();
 
-            // LOGIQUE CORRIGÉE : Selon le comportement attendu
             if (animal instanceof Loup) {
-                // Si c'est le LOUP, TOUJOURS mettre de l'herbe (comme dans mettreAJourInterface)
                 Herbe nouvelleHerbe = new Herbe(oldX, oldY);
                 grille.remplacer(oldX, oldY, nouvelleHerbe);
 
-                // Afficher l'herbe
                 ImageView herbeView = creerImageViewPourElement(nouvelleHerbe);
                 if (herbeView != null) {
                     oldCell.getChildren().add(herbeView);
                 }
             } else {
-                // Si c'est le MOUTON, mettre un végétal aléatoire (comme dans mettreAJourInterface)
                 Vegetaux nouveauVegetal = genererVegetalAleatoire(oldX, oldY);
                 grille.remplacer(oldX, oldY, nouveauVegetal);
 
-                // Afficher le végétal aléatoire
                 ImageView vegetalView = creerImageViewPourElement(nouveauVegetal);
                 if (vegetalView != null) {
                     oldCell.getChildren().add(vegetalView);
                 }
             }
 
-            // 2. GÉRER L'ALIMENTATION DU MOUTON (si applicable)
             if (animal instanceof Mouton) {
                 Mouton mouton = (Mouton) animal;
                 Elements elementDestination = grille.getElement(newX, newY);
 
-                // Si le mouton arrive sur un végétal, il le mange
                 if (elementDestination instanceof Vegetaux) {
                     mouton.manger((Vegetaux) elementDestination);
 
-                    // Mettre à jour les compteurs
                     if (elementDestination instanceof Herbe) {
                         herbeMangée++;
                         cptHerbe.setText(String.valueOf(herbeMangée));
@@ -894,27 +823,22 @@
                 }
             }
 
-            // 3. METTRE L'ANIMAL DANS LA GRILLE À SA NOUVELLE POSITION
             grille.remplacer(newX, newY, animal);
 
-            // 4. METTRE À JOUR L'AFFICHAGE DE LA NOUVELLE POSITION
             StackPane newCell = cellules[newX][newY];
             newCell.getChildren().clear();
 
-            // Afficher l'animal à sa nouvelle position
             ImageView animalView = creerImageViewPourElement(animal);
             if (animalView != null) {
                 newCell.getChildren().add(animalView);
             }
 
-            // 5. SI C'EST LA SORTIE, REMETTRE LE MARQUEUR DORÉ
             if (newX == coSortie[0] && newY == coSortie[1]) {
                 Rectangle exitMarker = new Rectangle(50, 50);
                 exitMarker.setFill(Color.GOLD.deriveColor(0, 1, 1, 0.3));
                 newCell.getChildren().add(exitMarker);
             }
 
-            // 6. METTRE À JOUR LES COORDONNÉES DE RÉFÉRENCE
             if (animal instanceof Loup) {
                 coLoup[0] = newX;
                 coLoup[1] = newY;
@@ -924,7 +848,6 @@
             }
         }
 
-        // NOUVELLE MÉTHODE : Créer ImageView pour un élément
         private ImageView creerImageViewPourElement(Elements element) {
             String imagePath = null;
 
@@ -953,7 +876,6 @@
             return null;
         }
 
-        // NOUVELLE MÉTHODE : Générer un végétal aléatoire
         private Vegetaux genererVegetalAleatoire(int x, int y) {
             int type = random.nextInt(3);
             switch (type) {
@@ -964,7 +886,6 @@
             }
         }
 
-        // NOUVELLE MÉTHODE : Afficher le résultat final
         private void afficherResultatFinal(String vainqueur) {
             simulationEnCours = false;
 
@@ -987,7 +908,6 @@
             alert.showAndWait();
         }
 
-        // ===== MÉTHODES EXISTANTES (inchangées) =====
 
         private void initializeMoutons(Grille grille) {
             for (int i = 0; i < grille.getNbLignes(); i++) {
